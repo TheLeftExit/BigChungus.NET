@@ -1,0 +1,20 @@
+﻿public static partial class Win32Macros
+{
+    public const UINT ICC_LISTVIEW_CLASSES = 0x00000001;
+    public const UINT ICC_TREEVIEW_CLASSES = 0x00000002;
+    public const UINT ICC_BAR_CLASSES = 0x00000004;
+    public const UINT ICC_TAB_CLASSES = 0x00000008;
+    public const UINT ICC_UPDOWN_CLASS = 0x00000010;
+    public const UINT ICC_PROGRESS_CLASS = 0x00000020;
+    public const UINT ICC_HOTKEY_CLASS = 0x00000040;
+    public const UINT ICC_ANIMATE_CLASS = 0x00000080;
+    public const UINT ICC_WIN95_CLASSES = 0x000000FF;
+    public const UINT ICC_DATE_CLASSES = 0x00000100;
+    public const UINT ICC_USEREX_CLASSES = 0x00000200;
+    public const UINT ICC_COOL_CLASSES = 0x00000400;
+    public const UINT ICC_INTERNET_CLASSES = 0x00000800;
+    public const UINT ICC_PAGESCROLLER_CLASS = 0x00001000;
+    public const UINT ICC_NATIVEFNTCTL_CLASS = 0x00002000;
+    public const UINT ICC_STANDARD_CLASSES = 0x00004000;
+    public const UINT ICC_LINK_CLASS = 0x00008000;
+}
