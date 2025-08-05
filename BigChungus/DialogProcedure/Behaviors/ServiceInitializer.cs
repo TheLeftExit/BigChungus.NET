@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
+// TODO: reconsider this whole design
 public interface IDialogService<TSelf>
     where TSelf : IDialogService<TSelf>
 {
@@ -15,7 +16,7 @@ public class ServiceInitializer<TViewModel, TService> : IDialogBehavior<TViewMod
 
     nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
     {
-        if(message.msg is WM_INITDIALOG)
+        if (message.msg is WM_INITDIALOG)
         {
             var service = TService.Create(dialogBoxHandle);
             ViewModelSetMethod(viewModel, service);

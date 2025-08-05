@@ -399,4 +399,13 @@ public static unsafe partial class Win32
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial BOOL ReleaseCapture();
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messageboxw
+    [LibraryImport("user32.dll", EntryPoint = "MessageBoxW")]
+    public static partial int MessageBox(
+        HWND hWnd,
+        LPCWSTR lpText,
+        LPCWSTR lpCaption,
+        UINT uType
+    );
 }

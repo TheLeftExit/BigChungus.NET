@@ -20,7 +20,7 @@ Remaining tasks (not limited to):
     - [ ] `RadioButton` (including grouping & binding)
     - [x] `GroupBox`
     - [x] Dialog box itself
-    - [ ] `Edit`
+    - [x] `TextBox`
     - [ ] `Label`
     - [ ] `LineHorizontal`/`LineVertical`
     - [ ] `ProgressBar`
