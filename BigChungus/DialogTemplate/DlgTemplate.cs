@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 public class DlgTemplate : BinaryTemplate
 {
-    public uint Style = WS_SYSMENU | WS_MINIMIZEBOX | DS_MODALFRAME | DS_SETFONT;
+    public uint Style = WS_SYSMENU | WS_MINIMIZEBOX | DS_MODALFRAME | DS_SETFONT | DS_CENTER;
     public uint ExStyle = WS_EX_APPWINDOW;
     public List<DlgItemTemplate> Items { get; } = new();
     public short X = 100;

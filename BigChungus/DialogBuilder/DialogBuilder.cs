@@ -4,18 +4,6 @@
     private readonly DialogProcedureBuilder<TViewModel> _dialogProcedureBuilder = new();
     private readonly DialogTemplateBuilder _dialogTemplateBuilder = new();
 
-    public DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text = null, DialogItemInitialize<T>? initialize = null)
-        where T : IDialogItemProperties, new()
-    {
-        return _dialogTemplateBuilder.AddItem(bounds, text, initialize);
-    }
-
-    public DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, DialogItemInitialize<T>? initialize)
-        where T : IDialogItemProperties, new()
-    {
-        return _dialogTemplateBuilder.AddItem(bounds, null, initialize);
-    }
-
     public DialogRunner<TViewModel> Build(TViewModel viewModel)
     {
         var dlgProc = _dialogProcedureBuilder.Build(viewModel);
@@ -23,12 +11,14 @@
         return new DialogRunner<TViewModel>(dlgProc, template);
     }
 
+    public DialogProperties Properties => _dialogTemplateBuilder.Properties;
+
     void IDialogProcedureBuilder<TViewModel>.AddBehavior(IDialogBehavior<TViewModel> behavior)
     {
         _dialogProcedureBuilder.AddBehavior(behavior);
     }
 
-    DialogItemHandle<T> IDialogTemplateBuilder.AddItem<T>(RectangleDLU bounds, string? text, DialogItemInitialize<T>? initialize)
+    DialogItemHandle<T> IDialogTemplateBuilder.AddItem<T>(RectangleDLU bounds, string? text, Action<T>? initialize)
     {
         return _dialogTemplateBuilder.AddItem(bounds, text, initialize);
     }

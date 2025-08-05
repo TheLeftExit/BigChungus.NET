@@ -2,26 +2,48 @@
 {
     uint Style { get; init; }
     uint ExStyle { get; init; }
-    void SetDefault();
     string ClassName { get; }
 }
 
-public static class StyleHelper
+public abstract class DialogItem : IDialogItemProperties
 {
-    public static bool GetTabStop(uint style) => FlagHelper.GetFlag(style, WS_TABSTOP);
-    public static void SetTabStop(ref uint style, bool set) => FlagHelper.SetFlag(ref style, WS_TABSTOP, set);
+    protected uint style;
+    protected uint exStyle;
 
-    public static bool GetEnabled(uint style) => !FlagHelper.GetFlag(style, WS_DISABLED);
-    public static void SetEnabled(ref uint style, bool set) => FlagHelper.SetFlag(ref style, WS_DISABLED, !set);
+    protected abstract string ClassName { get; }
+    
+    protected DialogItem()
+    {
+        Visible = true;
+    }
 
-    public static bool GetVisible(uint style) => FlagHelper.GetFlag(style, WS_VISIBLE);
-    public static void SetVisible(ref uint style, bool set) => FlagHelper.SetFlag(ref style, WS_VISIBLE, set);
+    public bool TabStop
+    {
+        get => FlagHelper.GetFlag(style, WS_TABSTOP);
+        set => FlagHelper.SetFlag(ref style, WS_TABSTOP, value);
+    }
 
-    public static bool GetStartGroup(uint style) => FlagHelper.GetFlag(style, WS_GROUP);
-    public static void SetStartGroup(ref uint style, bool set) => FlagHelper.SetFlag(ref style, WS_GROUP, set);
+    public bool Enabled
+    {
+        get => !FlagHelper.GetFlag(style, WS_DISABLED);
+        set => FlagHelper.SetFlag(ref style, WS_DISABLED, !value);
+    }
 
-    public static bool GetIsChild(uint style) => FlagHelper.GetFlag(style, WS_CHILD);
-    public static void SetIsChild(ref uint style, bool set) => FlagHelper.SetFlag(ref style, WS_CHILD, set);
+    public bool Visible
+    {
+        get => FlagHelper.GetFlag(style, WS_VISIBLE);
+        set => FlagHelper.SetFlag(ref style, WS_VISIBLE, value);
+    }
+
+    protected bool StartGroup
+    {
+        get => FlagHelper.GetFlag(style, WS_GROUP);
+        set => FlagHelper.SetFlag(ref style, WS_GROUP, value);
+    }
+
+    uint IDialogItemProperties.Style { get => style; init => style = value; }
+    uint IDialogItemProperties.ExStyle { get => exStyle; init => exStyle = value; }
+    string IDialogItemProperties.ClassName => ClassName;
 }
 
 public enum HAlignment { Left, Center, Right }

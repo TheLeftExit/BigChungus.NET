@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="BigChungus.Demo/BigChungus.Demo.csproj" />
+  <Project Path="BigChungus.Win32/BigChungus.Win32.csproj" />
+  <Project Path="BigChungus/BigChungus.csproj" />
+</Solution>

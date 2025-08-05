@@ -15,10 +15,14 @@ Core infrastructure/API implemented. `Button` feature-complete as a sample contr
 Remaining tasks (not limited to):
 
 - [ ] Dialog item & runtime control wrappers
-    - [ ] `CheckBox`, `RadioButton`, `GroupBox`
-    - [ ] Dialog box itself
+    - [x] `CheckBox`
+    - [ ] `CheckBoxThreeState`
+    - [ ] `RadioButton` (including grouping & binding)
+    - [x] `GroupBox`
+    - [x] Dialog box itself
     - [ ] `Edit`
     - [ ] `Label`
+    - [ ] `LineHorizontal`/`LineVertical`
     - [ ] `ProgressBar`
     - [ ] `TrackBar`
     - [ ] `ListView` (including list binding)
@@ -28,6 +32,7 @@ Remaining tasks (not limited to):
     - [ ] Common dialogs (open/save, message box, etc.)
     - [ ] Tooltips
     - [ ] Validation (if there's a safe and viable solution)
+    - [ ] Images (dialog icon, supported controls)
 - [ ] IntelliSense docs
 - [ ] Publish to NuGet (when viable for usage in real utilities)
      

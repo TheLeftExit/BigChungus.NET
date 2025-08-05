@@ -7,6 +7,18 @@
     {
         Text = $"Clicked {++clickCount} times!";
     }
+
+    public string Caption { get; set; } = "Initial Caption";
+
+    public bool Checked
+    {
+        get;
+        set
+        {
+            Caption = value ? "Checked" : "Unchecked";
+            SetValue(ref field, value, "Caption");
+        }
+    }
 }
 
 

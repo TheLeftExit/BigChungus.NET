@@ -37,6 +37,12 @@ public readonly struct ButtonControl : IControl<ButtonControl, ButtonCommand>
         get => new Control(_handle).Text;
         set => new Control(_handle).Text = value;
     }
+
+    public bool ShowShield
+    {
+        get => throw new NotSupportedException();
+        set => Win32.SendMessage(_handle, BCM_SETSHIELD, 0, value ? 1 : 0);
+    }
 }
 
 public static partial class DialogProcedureBuilderExtensions

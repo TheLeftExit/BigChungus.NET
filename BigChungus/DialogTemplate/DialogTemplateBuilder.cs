@@ -1,8 +1,6 @@
-﻿public delegate void DialogItemInitialize<T>(ref T item) where T : IDialogItemProperties;
-
-public interface IDialogTemplateBuilder
+﻿public interface IDialogTemplateBuilder
 {
-    DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text, DialogItemInitialize<T>? initialize)
+    DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text, Action<T>? initialize)
         where T : IDialogItemProperties, new();
 }
 
@@ -11,17 +9,17 @@ public record struct DialogItemHandle<T>(ushort? Id) where T : IDialogItemProper
 public class DialogTemplateBuilder : IDialogTemplateBuilder
 {
     private readonly DlgTemplate _template = new();
-
     private ushort nextItemId = 1000;
 
-    public DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text, DialogItemInitialize<T>? initialize)
+    public DialogProperties Properties => field ??= new DialogProperties(_template);
+
+    public DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text, Action<T>? initialize)
         where T : IDialogItemProperties, new()
     {
         var properties = new T();
-        properties.SetDefault();
         if(initialize is not null)
         {
-            initialize(ref properties);
+            initialize(properties);
         }
 
         var item = new DlgItemTemplate()
@@ -43,5 +41,29 @@ public class DialogTemplateBuilder : IDialogTemplateBuilder
     public ReadOnlyMemory<byte> Build()
     {
         return _template.ToMemory();
+    }
+}
+
+public static partial class DialogTemplateBuilderExtensions
+{
+    public static DialogItemHandle<T> AddItem<T>(
+        this IDialogTemplateBuilder builder,
+        RectangleDLU bounds,
+        string? text = null,
+        Action<T>? initialize = null
+    )
+        where T : IDialogItemProperties, new()
+    {
+        return builder.AddItem(bounds, text, initialize);
+    }
+
+    public static DialogItemHandle<T> AddItem<T>(
+        this IDialogTemplateBuilder builder,
+        RectangleDLU bounds,
+        Action<T>? initialize
+    )
+        where T : IDialogItemProperties, new()
+    {
+        return builder.AddItem(bounds, null, initialize);
     }
 }

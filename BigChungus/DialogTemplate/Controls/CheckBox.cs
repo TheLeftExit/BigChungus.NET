@@ -1,28 +1,10 @@
-﻿public struct CheckBox(uint style, uint exStyle) : IDialogItemProperties
+﻿public class CheckBox : DialogItem
 {
-    uint IDialogItemProperties.Style { get => style; init => style = value; }
-    uint IDialogItemProperties.ExStyle { get => exStyle; init => exStyle = value; }
-    void IDialogItemProperties.SetDefault()
+    protected override string ClassName => "Button";
+    public CheckBox()
     {
-        Visible = true;
+        TabStop = true;
         FlagHelper.SetFlag(ref style, BS_AUTOCHECKBOX, true);
-    }
-    string IDialogItemProperties.ClassName => "Button";
-
-    public bool TabStop
-    {
-        get => StyleHelper.GetTabStop(style);
-        set => StyleHelper.SetTabStop(ref style, value);
-    }
-    public bool Enabled
-    {
-        get => StyleHelper.GetEnabled(style);
-        set => StyleHelper.SetEnabled(ref style, value);
-    }
-    public bool Visible
-    {
-        get => StyleHelper.GetVisible(style);
-        set => StyleHelper.SetVisible(ref style, value);
     }
 
     public bool PushLike

@@ -1,4 +1,6 @@
-﻿public abstract class DialogBinding<TViewModel, TControl> : IDialogBehavior<TViewModel>
+﻿public enum NoCommand;
+
+public abstract class DialogBinding<TViewModel, TControl> : IDialogBehavior<TViewModel>
     where TViewModel : class
     where TControl : struct, IControl<TControl>
 {
