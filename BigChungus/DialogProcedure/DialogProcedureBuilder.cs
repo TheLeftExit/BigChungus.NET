@@ -23,7 +23,6 @@ public class DialogProcedureBuilder<TViewModel> : IDialogProcedureBuilder<TViewM
 
     public void AddBehavior(IDialogBehavior<TViewModel> behavior)
     {
-        ArgumentNullException.ThrowIfNull(behavior);
         _behaviors.Add(behavior);
     }
 
@@ -60,9 +59,16 @@ public sealed class DialogView<TViewModel> : IDlgProc
             return null;
         }
 
+        nint? returnValue = null;
         foreach (var behavior in _behaviors)
         {
-            behavior.OnMessageReceived(m, m.hWnd, _viewModel);
+            var behaviorResult = behavior.OnMessageReceived(m, m.hWnd, _viewModel);
+            if (behaviorResult is nint behaviorReturnValue)
+            {
+                returnValue = returnValue is null
+                    ? behaviorReturnValue
+                    : throw new InvalidOperationException("Multiple behaviors returned a value for the same message.");
+            }
         }
 
         if (m.msg is WM_CLOSE)
@@ -72,8 +78,8 @@ public sealed class DialogView<TViewModel> : IDlgProc
 
         if (m.msg is WM_DESTROY)
         {
-            _dialogBoxHandle = 0;
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged -= OnPropertyChanged;
+            _dialogBoxHandle = 0;
         }
 
         return null;
@@ -81,9 +87,16 @@ public sealed class DialogView<TViewModel> : IDlgProc
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        var dialogBoxHandle = _dialogBoxHandle ?? throw new UnreachableException();
+
+        if (Win32.GetCurrentThreadId() != Win32.GetWindowThreadProcessId(dialogBoxHandle, out _))
+        {
+            throw new InvalidOperationException("Cross-thread operation detected.");
+        }
+
         foreach (var behavior in _behaviors)
         {
-            behavior.OnPropertyChanged(e.PropertyName, _dialogBoxHandle ?? throw new UnreachableException(), _viewModel);
+            behavior.OnPropertyChanged(e.PropertyName, dialogBoxHandle, _viewModel);
         }
     }
 }

@@ -6,6 +6,19 @@
 
 public record struct DialogItemHandle<T>(ushort? Id) where T : IDialogItemProperties;
 
+public ref struct RadioGroupScope
+{
+    private readonly DialogTemplateBuilder _builder;
+    public RadioGroupScope(DialogTemplateBuilder builder)
+    {
+        _builder = builder;
+    }
+    public void Dispose()
+    {
+        _builder.EndRadioGroup();
+    }
+}
+
 public class DialogTemplateBuilder : IDialogTemplateBuilder
 {
     private readonly DlgTemplate _template = new();
@@ -13,19 +26,55 @@ public class DialogTemplateBuilder : IDialogTemplateBuilder
 
     public DialogProperties Properties => field ??= new DialogProperties(_template);
 
+    private bool _inRadioGroup = false;
+    private bool _atRadioGroupBoundary = false;
+
+    public RadioGroupScope BeginRadioGroup()
+    {
+        if (_inRadioGroup) throw new InvalidOperationException("Recursive 'BeginRadioGroup' scope.");
+        _inRadioGroup = true;
+        _atRadioGroupBoundary = true;
+        return new RadioGroupScope(this);
+    }
+
+    public void EndRadioGroup()
+    {
+        if(!_inRadioGroup) throw new InvalidOperationException("Call to 'EndRadioGroup' outside of a 'BeginRadioGroup' scope.");
+        if(_atRadioGroupBoundary) throw new InvalidOperationException("Radio group does not contain any items.");
+        _inRadioGroup = false;
+        _atRadioGroupBoundary = true;
+    }
+
     public DialogItemHandle<T> AddItem<T>(RectangleDLU bounds, string? text, Action<T>? initialize)
         where T : IDialogItemProperties, new()
     {
+        if (!_inRadioGroup && typeof(T) == typeof(RadioButton))
+        {
+            throw new InvalidOperationException("RadioButton must be added inside a 'BeginRadioGroup' scope.");
+        }
+        if(_inRadioGroup && typeof(T) != typeof(RadioButton))
+        {
+            throw new InvalidOperationException("Only RadioButton can be added inside a 'BeginRadioGroup' scope.");
+        }
+
         var properties = new T();
         if(initialize is not null)
         {
             initialize(properties);
         }
 
+        var(style, exStyle) = (properties.Style, properties.ExStyle);
+
+        if (_atRadioGroupBoundary)
+        {
+            style |= WS_GROUP;
+            _atRadioGroupBoundary = false;
+        }
+
         var item = new DlgItemTemplate()
         {
-            Style = properties.Style,
-            ExStyle = properties.ExStyle,
+            Style = style,
+            ExStyle = exStyle,
             X = bounds.X,
             Y = bounds.Y,
             Width = bounds.Width,

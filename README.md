@@ -17,7 +17,7 @@ Remaining tasks (not limited to):
 - [ ] Dialog item & runtime control wrappers
     - [x] `CheckBox`
     - [ ] `CheckBoxThreeState`
-    - [ ] `RadioButton` (including grouping & binding)
+    - [x] `RadioButton` (including grouping & binding)
     - [x] `GroupBox`
     - [x] Dialog box itself
     - [x] `TextBox`

@@ -10,6 +10,7 @@ public class MyViewModel : BindableViewModel
     public void OnClick()
     {
         Text = $"Clicked {++clickCount} times!";
+        RadioValue = (RadioButtonValue)((int)(RadioValue + 1) % 4);
         CommonDialogService.ShowMessageBox("Good job!");
     }
 
@@ -24,6 +25,22 @@ public class MyViewModel : BindableViewModel
             SetValue(ref field, value, "Caption");
         }
     }
+
+    public RadioButtonValue RadioValue
+    {
+        get;
+        set
+        {
+            Text = value.ToString();
+            SetValue(ref field, value);
+        }
+    } = RadioButtonValue.English;
 }
 
-
+public enum RadioButtonValue
+{
+    English,
+    Greek,
+    Montenegrin,
+    Chinese
+}

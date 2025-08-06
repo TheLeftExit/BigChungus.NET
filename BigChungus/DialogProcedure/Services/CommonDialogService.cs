@@ -2,7 +2,7 @@
 {
     MessageBoxResult ShowMessageBox(
         string text,
-        string? caption = "",
+        string caption = "",
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
         MessageBoxIcon icon = MessageBoxIcon.None
     );
@@ -19,9 +19,10 @@ public class CommonDialogService : IDialogService<CommonDialogService>
 
     public unsafe MessageBoxResult ShowMessageBox(
         string text,
-        string? caption = "",
+        string caption = "",
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
-        MessageBoxIcon icon = MessageBoxIcon.None)
+        MessageBoxIcon icon = MessageBoxIcon.None
+    )
     {
         fixed(char* textPtr = text, captionPtr = caption)
         {

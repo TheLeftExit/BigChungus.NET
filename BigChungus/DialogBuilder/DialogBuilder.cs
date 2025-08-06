@@ -12,6 +12,8 @@
     }
 
     public DialogProperties Properties => _dialogTemplateBuilder.Properties;
+    public RadioGroupScope BeginRadioGroup() => _dialogTemplateBuilder.BeginRadioGroup();
+    public void EndRadioGroup() => _dialogTemplateBuilder.EndRadioGroup();
 
     void IDialogProcedureBuilder<TViewModel>.AddBehavior(IDialogBehavior<TViewModel> behavior)
     {
