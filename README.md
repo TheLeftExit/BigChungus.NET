@@ -33,6 +33,7 @@ Remaining tasks (not limited to):
     - [ ] Tooltips
     - [ ] Validation (if there's a safe and viable solution)
     - [ ] Images (dialog icon, supported controls)
+- [ ] WYSIWYG dialog editor
 - [ ] IntelliSense docs
 - [ ] Publish to NuGet (when viable for usage in real utilities)
      

@@ -408,4 +408,105 @@ public static unsafe partial class Win32
         LPCWSTR lpCaption,
         UINT uType
     );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-beginpaint
+    [LibraryImport("user32.dll")]
+    public static partial HDC BeginPaint(
+        HWND hWnd,
+        out PAINTSTRUCT lpPaint
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-endpaint
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL EndPaint(
+        HWND hWnd,
+        in PAINTSTRUCT lpPaint
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-setpixel
+    [LibraryImport("gdi32.dll")]
+    public static partial COLORREF SetPixel(
+        HDC hdc,
+        int x,
+        int y,
+        COLORREF color
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapdialogrect
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL MapDialogRect(
+        HWND hDlg,
+        ref RECT lpRect
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-adjustwindowrectex
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL AdjustWindowRectEx(
+        ref RECT lpRect,
+        DWORD dwStyle,
+        [MarshalAs(UnmanagedType.Bool)] BOOL bMenu,
+        DWORD dwExStyle
+    );
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL GetClientRect(
+        HWND hWnd,
+        out RECT lpRect
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createcompatibledc
+    [LibraryImport("gdi32.dll")]
+    public static partial HDC CreateCompatibleDC(
+        HDC hdc
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createcompatiblebitmap
+    [LibraryImport("gdi32.dll")]
+    public static partial HBITMAP CreateCompatibleBitmap(
+        HDC hdc,
+        int cx,
+        int cy
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-deletedc
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL DeleteDC(
+        HDC hdc
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-deletedc
+    [LibraryImport("gdi32.dll")]
+    public static partial HGDIOBJ SelectObject(
+        HDC hdc,
+        HGDIOBJ h
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-fillrect
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL FillRect(
+        HDC hDC,
+        in RECT lprc,
+        HBRUSH hbr
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL BitBlt(
+        HDC hdc,
+        int x,
+        int y,
+        int cx,
+        int cy,
+        HDC hdcSrc,
+        int x1,
+        int y1,
+        DWORD rop
+    );
 }

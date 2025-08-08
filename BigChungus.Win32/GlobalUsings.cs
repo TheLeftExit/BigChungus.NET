@@ -31,6 +31,10 @@ global using DWORD_PTR = nuint;
 global using ULONGLONG = ulong;
 global using INT_PTR = nint;
 global using WORD = ushort;
+global using HDC = nint;
+global using COLORREF = uint;
+global using HBITMAP = nint;
+global using HGDIOBJ = nint;
 
 global using unsafe PVOID = void*;
 global using unsafe LPVOID = void*;

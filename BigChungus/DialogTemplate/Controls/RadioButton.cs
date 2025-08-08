@@ -1,21 +1,16 @@
-﻿public class CheckBox : DialogItem
+﻿public class RadioButton : DialogItem
 {
     protected override string ClassName => "Button";
-    public CheckBox()
+    public RadioButton()
     {
         TabStop = true;
-        StyleHelper.SetStyle(ref style, BS_TYPEMASK, BS_AUTOCHECKBOX);
+        StyleHelper.SetStyle(ref style, BS_TYPEMASK, BS_AUTORADIOBUTTON);
     }
 
     public bool PushLike
     {
         get => StyleHelper.GetFlag(style, BS_PUSHLIKE);
         set => StyleHelper.SetFlag(ref style, BS_PUSHLIKE, value);
-    }
-    public bool ThreeState
-    {
-        get => StyleHelper.GetFlag(style, (true, BS_AUTO3STATE), (false, BS_AUTOCHECKBOX));
-        set => StyleHelper.SetFlag(ref style, value, (true, BS_AUTO3STATE), (false, BS_AUTOCHECKBOX));
     }
     public bool TextMultiline
     {

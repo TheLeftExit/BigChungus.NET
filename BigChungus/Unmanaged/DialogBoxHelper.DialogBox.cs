@@ -17,7 +17,7 @@ public static partial class DialogBoxHelper
         );
     }
 
-    private unsafe static nint CreateDialog(ReadOnlySpan<byte> template, IDlgProc? handler = null, nint parentHandle = 0)
+    public unsafe static nint CreateDialog(ReadOnlySpan<byte> template, IDlgProc? handler = null, nint parentHandle = 0)
     {
         handler ??= DlgProcDefaultModeless.Shared;
         using var paddedMemory = new PaddedMemory(template);

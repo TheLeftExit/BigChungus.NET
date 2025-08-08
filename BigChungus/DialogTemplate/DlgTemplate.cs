@@ -28,7 +28,7 @@ public class DlgTemplate : BinaryTemplate
         writer.Write('\0'); // not supported: custom dialog class
         writer.Write(WindowText); writer.Write('\0');
 
-        if (FlagHelper.GetFlag(Style, DS_SETFONT))
+        if (StyleHelper.GetFlag(Style, DS_SETFONT))
         {
             writer.Write(FontSize);
             writer.Write(FontName); writer.Write('\0');

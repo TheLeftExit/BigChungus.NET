@@ -19,26 +19,26 @@ public abstract class DialogItem : IDialogItemProperties
 
     public bool TabStop
     {
-        get => FlagHelper.GetFlag(style, WS_TABSTOP);
-        set => FlagHelper.SetFlag(ref style, WS_TABSTOP, value);
+        get => StyleHelper.GetFlag(style, WS_TABSTOP);
+        set => StyleHelper.SetFlag(ref style, WS_TABSTOP, value);
     }
 
     public bool Enabled
     {
-        get => !FlagHelper.GetFlag(style, WS_DISABLED);
-        set => FlagHelper.SetFlag(ref style, WS_DISABLED, !value);
+        get => !StyleHelper.GetFlag(style, WS_DISABLED);
+        set => StyleHelper.SetFlag(ref style, WS_DISABLED, !value);
     }
 
     public bool Visible
     {
-        get => FlagHelper.GetFlag(style, WS_VISIBLE);
-        set => FlagHelper.SetFlag(ref style, WS_VISIBLE, value);
+        get => StyleHelper.GetFlag(style, WS_VISIBLE);
+        set => StyleHelper.SetFlag(ref style, WS_VISIBLE, value);
     }
 
     protected bool StartGroup
     {
-        get => FlagHelper.GetFlag(style, WS_GROUP);
-        set => FlagHelper.SetFlag(ref style, WS_GROUP, value);
+        get => StyleHelper.GetFlag(style, WS_GROUP);
+        set => StyleHelper.SetFlag(ref style, WS_GROUP, value);
     }
 
     uint IDialogItemProperties.Style { get => style; init => style = value; }

@@ -4,6 +4,7 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="BigChungus.Demo/BigChungus.Demo.csproj" />
+  <Project Path="BigChungus.DialogEditor/BigChungus.DialogEditor.csproj" Id="365222e8-17f6-4f34-bcb8-69731e832a8a" />
   <Project Path="BigChungus.Win32/BigChungus.Win32.csproj" />
   <Project Path="BigChungus/BigChungus.csproj" />
 </Solution>

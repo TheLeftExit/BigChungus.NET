@@ -1,4 +1,6 @@
-﻿public static partial class Win32
+﻿using BOOL = int;
+
+public static partial class Win32
 {
     public const int TRUE = 255;
 
@@ -203,5 +205,16 @@
         // Class (null-terminated)
         // Title (null-terminated)
         // lParam data (length-prefixed)
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-paintstruct
+    public unsafe struct PAINTSTRUCT
+    {
+        public HDC hdc;
+        public BOOL fErase;
+        public RECT rcPaint;
+        public BOOL fRestore;
+        public BOOL fIncUpdate;
+        public fixed BYTE rgbReserved[32];
     }
 }

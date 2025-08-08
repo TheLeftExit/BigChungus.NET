@@ -8,14 +8,12 @@ public class BindableViewModel : INotifyPropertyChanged
 
     private static readonly ConcurrentDictionary<string, PropertyChangedEventArgs> eventArgsCache = new();
 
-    protected void SetValue<T>(ref T field, T value, [CallerMemberName] string propertyName = null!)
+    protected void SetValue<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-        ArgumentNullException.ThrowIfNull(propertyName);
-        if (field is null && value is null) return;
         if(EqualityComparer<T>.Default.Equals(field, value)) return;
 
         field = value;
-        var args = eventArgsCache.GetOrAdd(propertyName, new PropertyChangedEventArgs(propertyName));
+        var args = eventArgsCache.GetOrAdd(propertyName ?? "$null", new PropertyChangedEventArgs(propertyName));
         PropertyChanged?.Invoke(this, args);
     }
 }

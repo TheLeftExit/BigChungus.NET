@@ -60,7 +60,7 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
         // Ensuring that the first item starts a group
         var firstButtonHandle = Win32.GetDlgItem(dialogBoxHandle, orderedItemIds[0]);
         var firstButtonStyle = (uint)Win32.GetWindowLongPtr(firstButtonHandle, GWLx_STYLE);
-        if(!FlagHelper.GetFlag(firstButtonStyle, WS_GROUP))
+        if(!StyleHelper.GetFlag(firstButtonStyle, WS_GROUP))
         {
             throw new InvalidOperationException("Invalid radio group specified.");
         }
@@ -69,7 +69,7 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
         {
             var buttonHandle = Win32.GetDlgItem(dialogBoxHandle, orderedItemIds[i]);
             var buttonStyle = (uint)Win32.GetWindowLongPtr(buttonHandle, GWLx_STYLE);
-            if (FlagHelper.GetFlag(buttonStyle, WS_GROUP))
+            if (StyleHelper.GetFlag(buttonStyle, WS_GROUP))
             {
                 throw new InvalidOperationException("Invalid radio group specified.");
             }
@@ -79,7 +79,7 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
         if(nextControlHandle != 0)
         {
             var nextControlStyle = (uint)Win32.GetWindowLongPtr(nextControlHandle, GWLx_STYLE);
-            if (!FlagHelper.GetFlag(nextControlStyle, WS_GROUP))
+            if (!StyleHelper.GetFlag(nextControlStyle, WS_GROUP))
             {
                 throw new InvalidOperationException("Invalid radio group specified.");
             }
