@@ -16,18 +16,12 @@ public abstract class DialogBinding<TViewModel, TControl> : IDialogBehavior<TVie
         return TControl.Create(controlHandle);
     }
 
-    protected virtual void OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel) { }
-    protected virtual void OnPropertyChanged(string? propertyName, nint dialogBoxHandle, TViewModel viewModel) { }
+    protected virtual void OnMessageReceived(Message message, IDialogContext<TViewModel> context) { }
 
-    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
-        OnMessageReceived(message, dialogBoxHandle, viewModel);
+        OnMessageReceived(message, context);
         return null;
-    }
-
-    void IDialogBehavior<TViewModel>.OnPropertyChanged(string? propertyName, nint dialogBoxHandle, TViewModel viewModel)
-    {
-        OnPropertyChanged(propertyName, dialogBoxHandle, viewModel);
     }
 }
 

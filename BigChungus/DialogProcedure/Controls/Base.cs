@@ -15,10 +15,23 @@ public interface IControl<TSelf, TCommand> : IControl<TSelf>
     bool IsCommandSender(Message message, TCommand command);
 }
 
-public readonly struct Control
+public readonly struct Control : IControl<Control, NoCommand>
 {
     private readonly nint _handle;
     public Control(nint hWnd) => _handle = hWnd;
+    static Control IControl<Control>.Create(nint handle) => new(handle);
+    nint IControl<Control>.Handle => _handle;
+
+    public static bool IsCommandMessage(Message message, out NoCommand command)
+    {
+        command = default;
+        return false;
+    }
+
+    public bool IsCommandSender(Message message, NoCommand command)
+    {
+        return false;
+    }
 
     public unsafe string? Text
     {

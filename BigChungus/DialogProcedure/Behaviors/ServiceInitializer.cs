@@ -14,17 +14,15 @@ public class ServiceInitializer<TViewModel, TService> : IDialogBehavior<TViewMod
 {
     public required ViewModelSetMethod<TViewModel, TService> ViewModelSetMethod { get; init; }
 
-    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if (message.msg is WM_INITDIALOG)
         {
-            var service = TService.Create(dialogBoxHandle);
-            ViewModelSetMethod(viewModel, service);
+            var service = TService.Create(context.DialogBoxHandle);
+            ViewModelSetMethod(context.ViewModel, service);
         }
         return null;
     }
-
-    void IDialogBehavior<TViewModel>.OnPropertyChanged(string? propertyName, nint dialogBoxHandle, TViewModel viewModel) { }
 }
 
 public static partial class DialogProcedureBuilderExtensions

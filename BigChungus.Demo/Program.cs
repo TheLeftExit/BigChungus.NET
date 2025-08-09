@@ -1,5 +1,5 @@
-﻿DialogEditor.Show(new(200, 100));
-return;
+﻿//DialogEditor.Show(new(200, 100));
+//return;
 
 var builder = new DialogBuilder<MyViewModel>();
 

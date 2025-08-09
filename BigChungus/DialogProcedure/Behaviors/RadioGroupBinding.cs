@@ -1,5 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
     where TViewModel : class
@@ -9,11 +11,18 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
     public required ViewModelSetMethod<TViewModel, TValue>? ViewModelSetMethod { private get; init; }
     public required string? ViewModelPropertyName { private get; init; }
 
-    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if(message.msg is WM_INITDIALOG)
         {
-            Validate(dialogBoxHandle);
+            Validate(context.DialogBoxHandle);
+            return null;
+        }
+
+        if(message.msg is WM_VIEWMODEL_PROPERTYCHANGED)
+        {
+            var e = (PropertyChangedEventArgs)GCHandle.FromIntPtr(message.lParam).Target!;
+            OnPropertyChanged(e.PropertyName, context);
             return null;
         }
 
@@ -24,25 +33,25 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
 
         foreach(var (itemId, value) in ItemValueMap)
         {
-            var handle = Win32.GetDlgItem(dialogBoxHandle, itemId);
+            var handle = Win32.GetDlgItem(context.DialogBoxHandle, itemId);
             var control = new RadioButtonControl(handle);
             if (!control.IsCommandSender(message, command)) continue;
 
-            ViewModelSetMethod(viewModel, value);
+            ViewModelSetMethod(context.ViewModel, value);
             return null;
         }
         return null;
     }
 
-    void IDialogBehavior<TViewModel>.OnPropertyChanged(string? propertyName, nint dialogBoxHandle, TViewModel viewModel)
+    private void OnPropertyChanged(string? propertyName, IDialogContext<TViewModel> context)
     {
         if (ViewModelGetMethod is null || ViewModelPropertyName is null) return;
         if (propertyName is not null && propertyName != ViewModelPropertyName) return;
-        var viewModelValue = ViewModelGetMethod(viewModel);
+        var viewModelValue = ViewModelGetMethod(context.ViewModel);
 
         foreach (var (itemId, value) in ItemValueMap)
         {
-            var handle = Win32.GetDlgItem(dialogBoxHandle, itemId);
+            var handle = Win32.GetDlgItem(context.DialogBoxHandle, itemId);
             var control = new RadioButtonControl(handle);
             control.IsChecked = EqualityComparer<TValue>.Default.Equals(value, viewModelValue);
         }

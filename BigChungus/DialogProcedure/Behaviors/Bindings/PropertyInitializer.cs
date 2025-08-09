@@ -8,11 +8,11 @@ public sealed class PropertyInitializer<TViewModel, TControl, TValue> : DialogBi
     public required ControlSetMethod<TControl, TValue> ControlSetMethod { get; init; }
     public required TValue Value { get; init; }
 
-    protected override void OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    protected override void OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if(message.msg is WM_INITDIALOG)
         {
-            var control = GetDialogItem(dialogBoxHandle);
+            var control = GetDialogItem(context.DialogBoxHandle);
             ControlSetMethod(control, Value);
         }
     }

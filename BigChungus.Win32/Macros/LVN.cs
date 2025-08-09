@@ -1,0 +1,46 @@
+﻿public static partial class Win32Macros
+{
+    public const UINT LVN_FIRST = unchecked(0U - 100U);
+    public const UINT LVN_LAST = unchecked(0U - 199U);
+    public const UINT LVN_ITEMCHANGING = (LVN_FIRST - 0);
+    public const UINT LVN_ITEMCHANGED = (LVN_FIRST - 1);
+    public const UINT LVN_INSERTITEM = (LVN_FIRST - 2);
+    public const UINT LVN_DELETEITEM = (LVN_FIRST - 3);
+    public const UINT LVN_DELETEALLITEMS = (LVN_FIRST - 4);
+    //public const UINT LVN_BEGINLABELEDITA = (LVN_FIRST - 5);
+    private const UINT LVN_BEGINLABELEDITW = (LVN_FIRST - 75);
+    //public const UINT LVN_ENDLABELEDITA = (LVN_FIRST - 6);
+    private const UINT LVN_ENDLABELEDITW = (LVN_FIRST - 76);
+    public const UINT LVN_COLUMNCLICK = (LVN_FIRST - 8);
+    public const UINT LVN_BEGINDRAG = (LVN_FIRST - 9);
+    public const UINT LVN_BEGINRDRAG = (LVN_FIRST - 11);
+    public const UINT LVN_ODCACHEHINT = (LVN_FIRST - 13);
+    //public const UINT LVN_ODFINDITEMA = (LVN_FIRST - 52);
+    private const UINT LVN_ODFINDITEMW = (LVN_FIRST - 79);
+    public const UINT LVN_ITEMACTIVATE = (LVN_FIRST - 14);
+    public const UINT LVN_ODSTATECHANGED = (LVN_FIRST - 15);
+    public const UINT LVN_ODFINDITEM = LVN_ODFINDITEMW;
+    public const UINT LVN_HOTTRACK = (LVN_FIRST - 21);
+    //public const UINT LVN_GETDISPINFOA = (LVN_FIRST - 50);
+    private const UINT LVN_GETDISPINFOW = (LVN_FIRST - 77);
+    //public const UINT LVN_SETDISPINFOA = (LVN_FIRST - 51);
+    private const UINT LVN_SETDISPINFOW = (LVN_FIRST - 78);
+    public const UINT LVN_BEGINLABELEDIT = LVN_BEGINLABELEDITW;
+    public const UINT LVN_ENDLABELEDIT = LVN_ENDLABELEDITW;
+    public const UINT LVN_GETDISPINFO = LVN_GETDISPINFOW;
+    public const UINT LVN_SETDISPINFO = LVN_SETDISPINFOW;
+    public const UINT LVN_KEYDOWN = (LVN_FIRST - 55);
+    public const UINT LVN_MARQUEEBEGIN = (LVN_FIRST - 56);
+    //public const UINT LVN_GETINFOTIPA = (LVN_FIRST - 57);
+    private const UINT LVN_GETINFOTIPW = (LVN_FIRST - 58);
+    public const UINT LVN_GETINFOTIP = LVN_GETINFOTIPW;
+    //public const UINT LVN_INCREMENTALSEARCHA = (LVN_FIRST - 62);
+    private const UINT LVN_INCREMENTALSEARCHW = (LVN_FIRST - 63);
+    public const UINT LVN_INCREMENTALSEARCH = LVN_INCREMENTALSEARCHW;
+    public const UINT LVN_COLUMNDROPDOWN = (LVN_FIRST - 64);
+    public const UINT LVN_COLUMNOVERFLOWCLICK = (LVN_FIRST - 66);
+    public const UINT LVN_BEGINSCROLL = (LVN_FIRST - 80);
+    public const UINT LVN_ENDSCROLL = (LVN_FIRST - 81);
+    public const UINT LVN_LINKCLICK = (LVN_FIRST - 84);
+    public const UINT LVN_GETEMPTYMARKUP = (LVN_FIRST - 87);
+}

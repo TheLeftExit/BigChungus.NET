@@ -6,14 +6,14 @@
     public required TCommand ControlCommand { get; init; }
     public required Action<TViewModel> ViewModelCommand { get; init; }
 
-    protected override void OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    protected override void OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if (!TControl.IsCommandMessage(message, out var command)) return;
-        var control = GetDialogItem(dialogBoxHandle);
+        var control = GetDialogItem(context.DialogBoxHandle);
         if (!control.IsCommandSender(message, command)) return;
         if (!EqualityComparer<TCommand>.Default.Equals(command, ControlCommand)) return;
 
-        ViewModelCommand(viewModel);
+        ViewModelCommand(context.ViewModel);
     }
 }
 

@@ -1,6 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 // Each update mode also reacts to messages matching all subsequent update modes, hence explicit values.
 public enum ViewModelUpdateMode
@@ -42,38 +44,42 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
 
     private bool isUpdating = false;
 
-    protected override void OnMessageReceived(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    protected override void OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if (isUpdating) return;
         using var updateLock = new UpdateLock(ref isUpdating);
 
-        if(message.msg is WM_INITDIALOG)
+        if(ProcessViewModelPropertyChanged(message, context)) return;
+
+        if (message.msg is WM_INITDIALOG)
         {
-            var control = GetDialogItem(dialogBoxHandle);
+            var control = GetDialogItem(context.DialogBoxHandle);
             DialogBoxHelper.SubclassToReflectOwnKillFocusToParent(control.Handle); // Repeat SetWindowSubclass calls are allowed by comctl32.
-            PushToControl(control, viewModel);
+            PushToControl(control, context.ViewModel);
             return;
         }
 
         if (!CanPushToViewModel()) return;
 
-        if (ProcessPropertyChangedMessage(message, dialogBoxHandle, viewModel)) return;
-        if (ProcessLoseFocusMessage(message, dialogBoxHandle, viewModel)) return;
-        if (ProcessDialogCloseMessage(message, dialogBoxHandle, viewModel)) return;
+        if (ProcessControlPropertyChangedMessage(message, context)) return;
+        if (ProcessLoseFocusMessage(message, context)) return;
+        if (ProcessDialogCloseMessage(message, context)) return;
     }
 
-    protected override void OnPropertyChanged(string? propertyName, nint dialogBoxHandle, TViewModel viewModel)
+    private bool ProcessViewModelPropertyChanged(Message message, IDialogContext<TViewModel> context)
     {
-        if (isUpdating) return;
-        using var updateLock = new UpdateLock(ref isUpdating);
+        if(message.msg is not WM_VIEWMODEL_PROPERTYCHANGED) return false;
 
-        if (!CanPushToControl()) return;
+        var e = (PropertyChangedEventArgs)GCHandle.FromIntPtr(message.lParam).Target!;
+
+        if (!CanPushToControl()) return true;
         
-        var push = propertyName is null || propertyName == ViewModelPropertyName;
-        if (!push) return;
+        var push = e.PropertyName is null || e.PropertyName == ViewModelPropertyName;
+        if (!push) return true;
 
-        var control = GetDialogItem(dialogBoxHandle);
-        PushToControl(control, viewModel);
+        var control = GetDialogItem(context.DialogBoxHandle);
+        PushToControl(control, context.ViewModel);
+        return true;
     }
 
     [MemberNotNullWhen(true, nameof(ControlSetMethod), nameof(ViewModelGetMethod))]
@@ -102,41 +108,41 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
         ViewModelSetMethod(viewModel, value);
     }
 
-    private bool ProcessPropertyChangedMessage(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    private bool ProcessControlPropertyChangedMessage(Message message, IDialogContext<TViewModel> context)
     {
         if (!TControl.IsCommandMessage(message, out var command)) return false;
         if (ViewModelUpdateMode > ViewModelUpdateMode.OnPropertyChanged) return true;
 
         if (!EqualityComparer<TCommand?>.Default.Equals(command, ControlCommand)) return true;
 
-        var control = GetDialogItem(dialogBoxHandle);
+        var control = GetDialogItem(context.DialogBoxHandle);
         if (control.IsCommandSender(message, command))
         {
-            PushToViewModel(control, viewModel);
+            PushToViewModel(control, context.ViewModel);
         }
         return true;
     }
 
-    private bool ProcessLoseFocusMessage(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    private bool ProcessLoseFocusMessage(Message message, IDialogContext<TViewModel> context)
     {
         if (message.msg is not WM_KILLFOCUS_REFLECT) return false;
         if (ViewModelUpdateMode > ViewModelUpdateMode.OnLoseFocus) return true;
 
-        var control = GetDialogItem(dialogBoxHandle);
+        var control = GetDialogItem(context.DialogBoxHandle);
         if(message.lParam == control.Handle)
         {
-            PushToViewModel(control, viewModel);
+            PushToViewModel(control, context.ViewModel);
         }
         return true;
     }
 
-    private bool ProcessDialogCloseMessage(Message message, nint dialogBoxHandle, TViewModel viewModel)
+    private bool ProcessDialogCloseMessage(Message message, IDialogContext<TViewModel> context)
     {
         if (message.msg is not WM_DESTROY) return false;
         if (ViewModelUpdateMode > ViewModelUpdateMode.OnDialogClose) return true;
 
-        var control = GetDialogItem(dialogBoxHandle);
-        PushToViewModel(control, viewModel);
+        var control = GetDialogItem(context.DialogBoxHandle);
+        PushToViewModel(control, context.ViewModel);
         return true;
 
     }
