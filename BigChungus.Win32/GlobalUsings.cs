@@ -3,6 +3,7 @@
 // Type aliases to simplify manual interop declaration and verification
 
 // BOOL/HRERSULT is declared in specific files (Boolean for LibraryImport, Int32 elsewhere)
+// LPCWSTR is declared similarly (ReadOnlySpan<char> for LibraryImport, char* elsewhere)
 global using UINT = uint;
 global using DWORD = uint;
 global using LONG = int;
@@ -38,7 +39,7 @@ global using HGDIOBJ = nint;
 
 global using unsafe PVOID = void*;
 global using unsafe LPVOID = void*;
-global using unsafe LPCWSTR = char*;
+global using unsafe PUINT = uint*;
 global using unsafe LPCDLGTEMPLATE = void*;
 
 // Callback aliases should use the type aliases above, but C# won't let us cross-reference using statements
@@ -57,7 +58,19 @@ global using unsafe SUBCLASSPROC = delegate* unmanaged[Stdcall]<nint, uint, nuin
 // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-dlgproc
 global using unsafe DLGPROC = delegate* unmanaged[Stdcall]<nint, uint, nuint, nint, nint>;
 
-public static unsafe partial class Win32Macros
+// Since it's a Win32 convention that LPCWSTR fields/parameters can accept numeric atoms,
+// we introduce a type that accepts a numeric value and marshals it into both of our managed representations of LPCWSTR,
+// and we name it so it kind of feels like Win32.
+public readonly unsafe struct IntResource
 {
-    private static char* MAKEINTRESOURCE(nint atom) => (char*)atom;
+    private readonly char* _value;
+    public IntResource(char* value)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((nuint)value, ushort.MaxValue);
+        _value = value;
+    }
+    public IntResource(nint value) : this((char*)value) { }
+
+    public static implicit operator char*(IntResource atom) => atom._value;
+    public static implicit operator ReadOnlySpan<char>(IntResource atom) => new ReadOnlySpan<char>(atom._value, 0);
 }

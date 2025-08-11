@@ -53,7 +53,7 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
 
         if (message.msg is WM_INITDIALOG)
         {
-            var control = GetDialogItem(context.DialogBoxHandle);
+            var control = GetDialogItem(context);
             DialogBoxHelper.SubclassToReflectOwnKillFocusToParent(control.Handle); // Repeat SetWindowSubclass calls are allowed by comctl32.
             PushToControl(control, context.ViewModel);
             return;
@@ -68,16 +68,14 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
 
     private bool ProcessViewModelPropertyChanged(Message message, IDialogContext<TViewModel> context)
     {
-        if(message.msg is not WM_VIEWMODEL_PROPERTYCHANGED) return false;
-
-        var e = (PropertyChangedEventArgs)GCHandle.FromIntPtr(message.lParam).Target!;
+        if (!PropertyChangedEventArgs.Parse(message, out var e)) return false;
 
         if (!CanPushToControl()) return true;
         
         var push = e.PropertyName is null || e.PropertyName == ViewModelPropertyName;
         if (!push) return true;
 
-        var control = GetDialogItem(context.DialogBoxHandle);
+        var control = GetDialogItem(context);
         PushToControl(control, context.ViewModel);
         return true;
     }
@@ -115,7 +113,7 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
 
         if (!EqualityComparer<TCommand?>.Default.Equals(command, ControlCommand)) return true;
 
-        var control = GetDialogItem(context.DialogBoxHandle);
+        var control = GetDialogItem(context);
         if (control.IsCommandSender(message, command))
         {
             PushToViewModel(control, context.ViewModel);
@@ -128,7 +126,7 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
         if (message.msg is not WM_KILLFOCUS_REFLECT) return false;
         if (ViewModelUpdateMode > ViewModelUpdateMode.OnLoseFocus) return true;
 
-        var control = GetDialogItem(context.DialogBoxHandle);
+        var control = GetDialogItem(context);
         if(message.lParam == control.Handle)
         {
             PushToViewModel(control, context.ViewModel);
@@ -141,7 +139,7 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
         if (message.msg is not WM_DESTROY) return false;
         if (ViewModelUpdateMode > ViewModelUpdateMode.OnDialogClose) return true;
 
-        var control = GetDialogItem(context.DialogBoxHandle);
+        var control = GetDialogItem(context);
         PushToViewModel(control, context.ViewModel);
         return true;
 

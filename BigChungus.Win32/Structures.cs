@@ -1,4 +1,7 @@
-﻿using BOOL = int;
+﻿using static Win32;
+using BOOL = int;
+using unsafe LPCWSTR = char*;
+using unsafe LPWSTR = char*;
 
 public static partial class Win32
 {
@@ -216,5 +219,62 @@ public static partial class Win32
         public BOOL fRestore;
         public BOOL fIncUpdate;
         public fixed BYTE rgbReserved[32];
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-nmlvdispinfow
+    public struct NMLVDISPINFO
+    {
+        public NMHDR hdr;
+        public LVITEM item;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-lvitemw
+    public unsafe struct LVITEM
+    {
+        public UINT mask;
+        public int iItem;
+        public int iSubItem;
+        public UINT state;
+        public UINT stateMask;
+        public LPWSTR pszText;
+        public int cchTextMax;
+        public int iImage;
+        public LPARAM lParam;
+        public int iIndent;
+        public int iGroupId;
+        public UINT cColumns;
+        public PUINT puColumns;
+        public int* piColFmt;
+        public int iGroup;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-lvcolumnw
+    public unsafe struct LVCOLUMN
+    {
+        public UINT mask;
+        public int fmt;
+        public int cx;
+        public LPWSTR pszText;
+        public int cchTextMax;
+        public int iSubItem;
+        public int iImage;
+        public int iOrder;
+        public int cxMin;
+        public int cxDefault;
+        public int cxIdeal;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-nmitemactivate
+    public struct NMITEMACTIVATE
+    {
+        public NMHDR hdr;
+        public int iItem;
+        public int iSubItem;
+        public UINT uNewState;
+        public UINT uOldState;
+        public UINT uChanged;
+        public POINT ptAction;
+        public LPARAM lParam;
+        public UINT uKeyFlags;
     }
 }

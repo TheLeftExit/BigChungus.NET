@@ -19,9 +19,8 @@ public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
             return null;
         }
 
-        if(message.msg is WM_VIEWMODEL_PROPERTYCHANGED)
+        if(PropertyChangedEventArgs.Parse(message, out var e))
         {
-            var e = (PropertyChangedEventArgs)GCHandle.FromIntPtr(message.lParam).Target!;
             OnPropertyChanged(e.PropertyName, context);
             return null;
         }

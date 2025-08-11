@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using static Win32;
 using BOOL = bool;
 using HRESULT = bool;
+using LPCWSTR = System.ReadOnlySpan<char>;
 
 public static unsafe partial class Win32
 {
@@ -508,5 +509,25 @@ public static unsafe partial class Win32
         int x1,
         int y1,
         DWORD rop
+    );
+
+    [LibraryImport("user32.dll", EntryPoint = "SetPropW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL SetProp(
+        HWND hWnd,
+        LPCWSTR lpString,
+        HANDLE hData
+    );
+
+    [LibraryImport("user32.dll", EntryPoint = "GetPropW")]
+    public static partial HANDLE GetProp(
+        HWND hWnd,
+        LPCWSTR lpString
+    );
+
+    [LibraryImport("user32.dll", EntryPoint = "RemovePropW")]
+    public static partial HANDLE RemoveProp(
+        HWND hWnd,
+        LPCWSTR lpString
     );
 }

@@ -12,7 +12,7 @@ public sealed class PropertyInitializer<TViewModel, TControl, TValue> : DialogBi
     {
         if(message.msg is WM_INITDIALOG)
         {
-            var control = GetDialogItem(context.DialogBoxHandle);
+            var control = GetDialogItem(context);
             ControlSetMethod(control, Value);
         }
     }

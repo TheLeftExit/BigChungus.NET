@@ -1,4 +1,6 @@
-﻿public enum NoCommand;
+﻿using System.Runtime.InteropServices;
+
+public enum NoCommand;
 
 public abstract class DialogBinding<TViewModel, TControl> : IDialogBehavior<TViewModel>
     where TViewModel : class
@@ -6,14 +8,24 @@ public abstract class DialogBinding<TViewModel, TControl> : IDialogBehavior<TVie
 {
     public required ushort? ItemId { private get; init; }
 
-    protected TControl GetDialogItem(nint dialogBoxHandle)
+    protected TControl GetDialogItem(IDialogContext<TViewModel> context)
     {
-        var controlHandle = ItemId switch
+        return GetDialogItem(context, out _);
+    }
+    protected TControl GetDialogItem(IDialogContext<TViewModel> context, out nint handle)
+    {
+        handle = ItemId switch
         {
-            ushort itemId => Win32.GetDlgItem(dialogBoxHandle, itemId),
-            _ => dialogBoxHandle
+            ushort itemId => Win32.GetDlgItem(context.DialogBoxHandle, itemId),
+            _ => context.DialogBoxHandle
         };
-        return TControl.Create(controlHandle);
+        return TControl.Create(handle);
+    }
+
+    protected ControlProperties GetProperties(IDialogContext<TViewModel> context)
+    {
+        var control = GetDialogItem(context);
+        return ControlProperties.FromControl(control);
     }
 
     protected virtual void OnMessageReceived(Message message, IDialogContext<TViewModel> context) { }

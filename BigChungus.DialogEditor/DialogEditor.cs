@@ -7,7 +7,7 @@ internal static unsafe class DialogEditorHelper
 {
     private static readonly nint HINSTANCE = NativeLibrary.GetMainProgramHandle();
 
-    private static readonly Lazy<ushort> _classAtom = new(() =>
+    private static readonly Lazy<IntResource> _classAtom = new(() =>
     {
         Win32.WNDCLASSEX classDefinition;
         fixed (char* className = "DialogEditor")
@@ -22,7 +22,7 @@ internal static unsafe class DialogEditorHelper
                 hCursor = Win32.LoadCursor(0, IDC_ARROW)
             };
         }
-        return Win32.RegisterClassEx(classDefinition).ThrowIf<ushort>(0);
+        return new(Win32.RegisterClassEx(classDefinition).ThrowIf<ushort>(0));
     }, LazyThreadSafetyMode.ExecutionAndPublication);
 
     private static readonly int[] _dluXPoints = CreateDLUPoints(2000, DLUDirection.X);
@@ -101,24 +101,20 @@ internal static unsafe class DialogEditorHelper
             bottom = _dluYPoints[size.Height]
         };
         Win32.AdjustWindowRectEx(ref windowSize, _windowStyle, false, _windowExStyle);
-        nint handle;
-        fixed (char* windowText = "Dialog Editor")
-        {
-            handle = Win32.CreateWindowEx(
-                _windowExStyle,
-                (char*)_classAtom.Value,
-                windowText,
-                _windowStyle,
-                int.MinValue,
-                int.MinValue,
-                windowSize.right - windowSize.left,
-                windowSize.bottom - windowSize.top,
-                0,
-                0,
-                HINSTANCE,
-                null
-            );
-        }
+        var handle = Win32.CreateWindowEx(
+            _windowExStyle,
+            _classAtom.Value,
+            "Dialog Editor",
+            _windowStyle,
+            int.MinValue,
+            int.MinValue,
+            windowSize.right - windowSize.left,
+            windowSize.bottom - windowSize.top,
+            0,
+            0,
+            HINSTANCE,
+            null
+        );
         Win32.ShowWindow(handle, SW_SHOW);
 
         Win32.MSG msg;

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -15,6 +16,7 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
 {
     private readonly TViewModel _viewModel;
     private readonly IDialogBehavior<TViewModel>[] _behaviors;
+    private readonly Dictionary<ushort, nint> _controlHandlesById;
 
     private nint? _dialogBoxHandle;
 
@@ -22,6 +24,7 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
     {
         _viewModel = viewModel;
         _behaviors = bindingPrototypes;
+        _controlHandlesById = new();
     }
 
     TViewModel IDialogContext<TViewModel>.ViewModel => _viewModel;
@@ -73,5 +76,26 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
         var gcHandle = GCHandle.Alloc(e);
         Win32.SendMessage(dialogBoxHandle, WM_VIEWMODEL_PROPERTYCHANGED, 0, GCHandle.ToIntPtr(gcHandle)); 
         gcHandle.Free();
+    }
+}
+
+public static class PropertyChangedEventArgsExtensions
+{
+    extension(PropertyChangedEventArgs)
+    {
+        public static bool Parse(Message message, [NotNullWhen(true)] out PropertyChangedEventArgs? e)
+        {
+            if(message.msg is not WM_VIEWMODEL_PROPERTYCHANGED)
+            {
+                e = null;
+                return false;
+            }
+            if(GCHandle.FromIntPtr(message.lParam).Target is not PropertyChangedEventArgs args)
+            {
+                throw new UnreachableException();
+            }
+            e = args;
+            return true;
+        }
     }
 }

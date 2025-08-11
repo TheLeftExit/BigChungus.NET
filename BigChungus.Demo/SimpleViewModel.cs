@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-public class MyViewModel : BindableViewModel
+public class SimpleViewModel : BindableViewModel
 {
     public CommonDialogService CommonDialogService { get; set; } = null!;
 

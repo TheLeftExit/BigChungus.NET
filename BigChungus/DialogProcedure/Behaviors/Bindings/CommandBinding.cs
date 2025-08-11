@@ -9,7 +9,7 @@
     protected override void OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
         if (!TControl.IsCommandMessage(message, out var command)) return;
-        var control = GetDialogItem(context.DialogBoxHandle);
+        var control = GetDialogItem(context);
         if (!control.IsCommandSender(message, command)) return;
         if (!EqualityComparer<TCommand>.Default.Equals(command, ControlCommand)) return;
 

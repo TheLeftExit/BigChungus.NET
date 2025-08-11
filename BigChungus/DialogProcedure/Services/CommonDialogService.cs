@@ -24,10 +24,7 @@ public class CommonDialogService : IDialogService<CommonDialogService>
         MessageBoxIcon icon = MessageBoxIcon.None
     )
     {
-        fixed(char* textPtr = text, captionPtr = caption)
-        {
-            return (MessageBoxResult)Win32.MessageBox(_dialogBoxHandle, textPtr, captionPtr, (uint)buttons | (uint)icon);
-        }
+        return (MessageBoxResult)Win32.MessageBox(_dialogBoxHandle, text, caption, (uint)buttons | (uint)icon);
     }
 }
 
