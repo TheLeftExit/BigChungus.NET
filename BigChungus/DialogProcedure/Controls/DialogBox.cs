@@ -63,18 +63,4 @@ public static partial class DialogProcedureBuilderExtensions
             controlUpdateMode
         );
     }
-
-    public static void SetProperty<TViewModel, TValue>(
-        this IDialogProcedureBuilder<TViewModel> builder,
-        Expression<Func<DialogBox, TValue>> controlPropertySelector,
-        TValue value
-    )
-        where TViewModel : class
-    {
-        builder.SetProperty(
-            null,
-            controlPropertySelector,
-            value
-        );
-    }
 }

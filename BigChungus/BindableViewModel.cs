@@ -13,7 +13,7 @@ public class BindableViewModel : INotifyPropertyChanged
         if(EqualityComparer<T>.Default.Equals(field, value)) return;
 
         field = value;
-        var args = eventArgsCache.GetOrAdd(propertyName ?? "$null", new PropertyChangedEventArgs(propertyName));
+        var args = eventArgsCache.GetOrAdd(propertyName ?? "$null", x => new PropertyChangedEventArgs(x));
         PropertyChanged?.Invoke(this, args);
     }
 }

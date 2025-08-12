@@ -277,4 +277,26 @@ public static partial class Win32
         public LPARAM lParam;
         public UINT uKeyFlags;
     }
+
+    public struct NMLVODSTATECHANGE
+    {
+        public NMHDR hdr;
+        public int iFrom;
+        public int iTo;
+        public UINT uNewState;
+        public UINT uOldState;
+    }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-nmlistview
+    public struct NMLISTVIEW
+    {
+        public NMHDR hdr;
+        public int iItem;
+        public int iSubItem;
+        public UINT uNewState;
+        public UINT uOldState;
+        public UINT uChanged;
+        public POINT ptAction;
+        public LPARAM lParam;
+    }
 }

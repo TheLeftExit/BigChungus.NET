@@ -21,6 +21,7 @@ public class ListViewModel : BindableViewModel
 
 public class ListItem : BindableViewModel
 {
+    public bool Checked { get; set => SetValue(ref field, value); }
     public int Id { get; set => SetValue(ref field, value); }
     public string? Name { get; set => SetValue(ref field, value); }
 }

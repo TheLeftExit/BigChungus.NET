@@ -8,7 +8,7 @@ public interface IDialogService<TSelf>
     abstract static TSelf Create(nint dialogBoxHandle);
 }
 
-public class ServiceInitializer<TViewModel, TService> : IDialogBehavior<TViewModel>
+public sealed class ServiceInitializer<TViewModel, TService> : IDialogBehavior<TViewModel>
     where TViewModel : class
     where TService : IDialogService<TService>
 {

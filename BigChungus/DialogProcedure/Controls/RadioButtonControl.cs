@@ -65,19 +65,4 @@ public static partial class DialogProcedureBuilderExtensions
             controlUpdateMode
         );
     }
-
-    public static void SetProperty<TViewModel, TValue>(
-        this IDialogProcedureBuilder<TViewModel> builder,
-        DialogItemHandle<RadioButton> handle,
-        Expression<Func<RadioButtonControl, TValue>> controlPropertySelector,
-        TValue value
-    )
-        where TViewModel : class
-    {
-        builder.SetProperty(
-            handle.Id,
-            controlPropertySelector,
-            value
-        );
-    }
 }

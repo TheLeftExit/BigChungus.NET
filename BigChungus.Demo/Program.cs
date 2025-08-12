@@ -21,8 +21,11 @@ public static class TestCases
         builder.SetListViewBinding(
             listView,
             x => x.Items,
-            new("Id", x => x.Id.ToString(), 100),
-            new("Name", x => x.Name ?? "None", 100)
+            [
+                new ListViewValueColumn<ListItem, int>("Id", x => x.Id, 100),
+                new ListViewStringColumn<ListItem>("Name", x => x.Name ?? "None", 100)
+            ],
+            ListViewOptions.FullRowSelect | ListViewOptions.GridLines
         );
         builder.SetListViewCommand(listView, x => x.OnCommand);
 

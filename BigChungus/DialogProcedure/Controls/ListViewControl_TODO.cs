@@ -4,7 +4,9 @@ using System.Reflection;
 public enum ListViewCommand
 {
     ItemClick = default,
-    GetItemInfo
+    GetItemInfo,
+    StateChanged,
+    ItemChanged
 }
 
 public readonly struct ListViewControl : IControl<ListViewControl, ListViewCommand>
@@ -29,6 +31,16 @@ public readonly struct ListViewControl : IControl<ListViewControl, ListViewComma
                 command = ListViewCommand.ItemClick;
                 return true;
             }
+            if(nmhdr->code is LVN_ODSTATECHANGED)
+            {
+                command = ListViewCommand.StateChanged;
+                return true;
+            }
+            if(nmhdr->code is LVN_ITEMCHANGED)
+            {
+                command = ListViewCommand.ItemChanged;
+                return true;
+            }
         }
         command = default;
         return false;
@@ -38,35 +50,11 @@ public readonly struct ListViewControl : IControl<ListViewControl, ListViewComma
     {
         return command switch
         {
-            ListViewCommand.ItemClick or ListViewCommand.GetItemInfo => ((Win32.NMLVDISPINFO*)message.lParam)->hdr.hwndFrom == _handle,
+            ListViewCommand.ItemClick
+            or ListViewCommand.GetItemInfo
+            or ListViewCommand.StateChanged
+            or ListViewCommand.ItemChanged => ((Win32.NMLVDISPINFO*)message.lParam)->hdr.hwndFrom == _handle,
             _ => false
         };
-    }
-}
-
-public static partial class DialogProcedureBuilderExtensions
-{
-    public static void SetListViewBinding<TViewModel, TRow>(
-        this IDialogProcedureBuilder<TViewModel> builder,
-        DialogItemHandle<ListView> handle,
-        Expression<Func<TViewModel, IList<TRow>>> viewModelCollectionPropertySelector,
-        params ListViewColumn<TViewModel, TRow>[] columns
-    )
-        where TViewModel : class
-        where TRow : class
-    {
-        var viewModelProperty = (viewModelCollectionPropertySelector.Body as MemberExpression)?.Member as PropertyInfo;
-        if (viewModelProperty is null) throw new NotSupportedException();
-
-        if (columns.Length is 0 or > 21) throw new ArgumentException(nameof(columns));
-
-        var behavior = new ListViewDataBinding<TViewModel, TRow>
-        {
-            ItemId = handle.Id,
-            ViewModelGetMethod = viewModelProperty.GetMethod!.CreateDelegate<ViewModelGetMethod<TViewModel, IList<TRow>?>>(),
-            ViewModelPropertyName = viewModelProperty.Name,
-            Columns = columns
-        };
-        builder.AddBehavior(behavior);
     }
 }

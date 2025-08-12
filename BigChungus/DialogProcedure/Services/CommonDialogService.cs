@@ -8,7 +8,7 @@
     );
 }
 
-public class CommonDialogService : IDialogService<CommonDialogService>
+public sealed class CommonDialogService : IDialogService<CommonDialogService>
 {
     private readonly nint _dialogBoxHandle;
     public CommonDialogService(nint dialogBoxHandle)

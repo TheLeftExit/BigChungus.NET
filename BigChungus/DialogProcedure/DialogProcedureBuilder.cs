@@ -12,7 +12,7 @@ public interface IDialogBehavior<TViewModel>
     nint? OnMessageReceived(Message message, IDialogContext<TViewModel> context);
 }
 
-public class DialogProcedureBuilder<TViewModel> : IDialogProcedureBuilder<TViewModel>
+public sealed class DialogProcedureBuilder<TViewModel> : IDialogProcedureBuilder<TViewModel>
     where TViewModel : class
 {
     private readonly List<IDialogBehavior<TViewModel>> _behaviors = new();

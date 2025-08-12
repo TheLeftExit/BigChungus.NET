@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
-public class ListViewCommandBinding<TViewModel> : DialogBinding<TViewModel, ListViewControl>
+public sealed class ListViewCommandBinding<TViewModel> : DialogBinding<TViewModel, ListViewControl>
     where TViewModel : class
 {
     public required Func<TViewModel, Action<int>> ViewModelCommandSelector { get; init; }

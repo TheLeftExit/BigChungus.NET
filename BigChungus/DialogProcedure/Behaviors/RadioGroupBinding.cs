@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-public class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
+public sealed class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
     where TViewModel : class
 {
     public required (ushort ItemId, TValue value)[] ItemValueMap { get; init; }

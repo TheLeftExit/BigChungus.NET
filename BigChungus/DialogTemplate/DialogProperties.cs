@@ -1,4 +1,4 @@
-﻿public class DialogProperties
+﻿public sealed class DialogProperties
 {
     private readonly DlgTemplate _template;
 

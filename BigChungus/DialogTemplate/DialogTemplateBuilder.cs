@@ -19,7 +19,7 @@ public ref struct RadioGroupScope
     }
 }
 
-public class DialogTemplateBuilder : IDialogTemplateBuilder
+public sealed class DialogTemplateBuilder : IDialogTemplateBuilder
 {
     private readonly DlgTemplate _template = new();
     private ushort nextItemId = 1000;
