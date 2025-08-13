@@ -4,11 +4,11 @@
     private readonly DialogProcedureBuilder<TViewModel> _dialogProcedureBuilder = new();
     private readonly DialogTemplateBuilder _dialogTemplateBuilder = new();
 
-    public DialogRunner<TViewModel> Build(TViewModel viewModel)
+    public DialogRunner<TViewModel> Build()
     {
-        var dlgProc = _dialogProcedureBuilder.Build(viewModel);
         var template = _dialogTemplateBuilder.Build();
-        return new DialogRunner<TViewModel>(dlgProc, template);
+        var procedure = _dialogProcedureBuilder.Build();
+        return new DialogRunner<TViewModel>(template, procedure);
     }
 
     public DialogProperties Properties => _dialogTemplateBuilder.Properties;
@@ -29,17 +29,17 @@
 public class DialogRunner<TViewModel>
     where TViewModel : class
 {
-    private readonly IDlgProc _dlgProc;
+    private readonly DialogProcedure<TViewModel> _procedure;
     private readonly ReadOnlyMemory<byte> _template;
 
-    public DialogRunner(IDlgProc dlgProc, ReadOnlyMemory<byte> template)
+    public DialogRunner(ReadOnlyMemory<byte> template, DialogProcedure<TViewModel> dlgProc)
     {
-        _dlgProc = dlgProc;
         _template = template;
+        _procedure = dlgProc;
     }
 
-    public void Run()
+    public void Run(TViewModel viewModel)
     {
-        DialogBoxHelper.DialogBox(_template.Span, _dlgProc);
+        DialogBoxHelper.DialogBox(_template.Span, _procedure.CreateDialogView(viewModel));
     }
 }

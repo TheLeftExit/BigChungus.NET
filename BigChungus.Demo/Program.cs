@@ -18,14 +18,14 @@ public static class TestCases
         builder.RegisterService(x => x.CommonDialogService);
 
         var listView = builder.AddItem<ListView>(new(4, 4, 280, 150));
-        builder.SetListViewBinding(
+        builder.SetListViewVirtualBinding(
             listView,
             x => x.Items,
             [
                 new ListViewValueColumn<ListItem, int>("Id", x => x.Id, 100),
                 new ListViewStringColumn<ListItem>("Name", x => x.Name ?? "None", 100)
             ],
-            ListViewOptions.FullRowSelect | ListViewOptions.GridLines
+            ListViewOptions.FullRowSelect | ListViewOptions.GridLines | ListViewOptions.HeaderDragDrop
         );
         builder.SetListViewCommand(listView, x => x.OnCommand);
 
@@ -37,8 +37,9 @@ public static class TestCases
         builder.SetCommand(removeButton, x => x.OnRemoveItem());
         builder.SetCommand(updateButton, x => x.OnUpdateItem());
 
+        var dialogRunner = builder.Build();
         var viewModel = new ListViewModel();
-        builder.Build(viewModel).Run();
+        dialogRunner.Run(viewModel);
     }
 
     public static void ShowSomeControls()
@@ -80,8 +81,9 @@ public static class TestCases
             (radio4, RadioButtonValue.Chinese)
         );
 
+        
+        var dialogRunner = builder.Build();
         var viewModel = new SimpleViewModel { Text = "Hello, World!" };
-        var dialogRunner = builder.Build(viewModel);
-        dialogRunner.Run();
+        dialogRunner.Run(viewModel);
     }
 }

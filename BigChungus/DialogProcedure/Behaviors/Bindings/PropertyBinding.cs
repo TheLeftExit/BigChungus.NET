@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Each update mode also reacts to messages matching all subsequent update modes, hence explicit values.
@@ -54,7 +55,7 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
         if (message.msg is WM_INITDIALOG)
         {
             var control = GetDialogItem(context);
-            DialogBoxHelper.SubclassToReflectOwnKillFocusToParent(control.Handle); // Repeat SetWindowSubclass calls are allowed by comctl32.
+            SubclassHelper.SubclassForLostFocus(control.Handle); // Repeat SetWindowSubclass calls are allowed by comctl32.
             PushToControl(control, context.ViewModel);
             return;
         }
@@ -160,6 +161,28 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
     }
 }
 
+file static class SubclassHelper // Separate `file static` because PropertyBinding is generic and UnmanagedCallersOnly doesn't like that.
+{
+    public static unsafe void SubclassForLostFocus(nint controlHandle)
+    {
+        Win32.SetWindowSubclass(controlHandle, &SubclassProc, WM_KILLFOCUS_REFLECT, 0).ThrowIfFalse();
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        static nint SubclassProc(nint hWnd, uint msg, nuint wParam, nint lParam, nuint uIdSubclass, nuint dwRefData)
+        {
+            if (msg == WM_KILLFOCUS)
+            {
+                var parentHandle = Win32.GetParent(hWnd);
+                if (parentHandle != 0)
+                {
+                    Win32.SendMessage(parentHandle, WM_KILLFOCUS_REFLECT, wParam, hWnd);
+                }
+            }
+            return Win32.DefSubclassProc(hWnd, msg, wParam, lParam);
+        }
+    }
+}
+
 public static partial class DialogProcedureBuilderExtensions
 {
     public static void SetBinding<TViewModel, TControl, TCommand, TValue>(
@@ -174,11 +197,14 @@ public static partial class DialogProcedureBuilderExtensions
         where TControl : struct, IControl<TControl, TCommand>
         where TCommand : struct, Enum
     {
-        var controlProperty = (controlPropertySelector.Body as MemberExpression)?.Member as PropertyInfo;
-        if (controlProperty is null) throw new NotSupportedException();
-
-        var viewModelProperty = (viewModelPropertySelector.Body as MemberExpression)?.Member as PropertyInfo;
-        if (viewModelProperty is null) throw new NotSupportedException();
+        if (controlPropertySelector is not { Body: MemberExpression { Member: PropertyInfo controlProperty } })
+        {
+            throw new NotSupportedException();
+        }
+        if (viewModelPropertySelector is not { Body: MemberExpression { Member: PropertyInfo viewModelProperty } })
+        {
+            throw new NotSupportedException();
+        }
 
         var behavior = new PropertyBinding<TViewModel, TControl, TCommand, TValue>
         {

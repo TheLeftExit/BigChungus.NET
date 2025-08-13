@@ -20,10 +20,10 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
 
     private nint? _dialogBoxHandle;
 
-    public DialogView(TViewModel viewModel, IDialogBehavior<TViewModel>[] bindingPrototypes)
+    public DialogView(TViewModel viewModel, IDialogBehavior<TViewModel>[] behaviors)
     {
         _viewModel = viewModel;
-        _behaviors = bindingPrototypes;
+        _behaviors = behaviors;
         _controlHandlesById = new();
     }
 
@@ -38,7 +38,7 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged += OnPropertyChanged;
         }
 
-        if (_dialogBoxHandle is 0)
+        if (_dialogBoxHandle is null)
         {
             return null;
         }
@@ -57,13 +57,13 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
 
         if (m.msg is WM_CLOSE)
         {
-            DialogBoxHelper.EndDialog(m.hWnd);
+            Win32.EndDialog(_dialogBoxHandle.Value, 0).ThrowIfFalse();
         }
 
         if (m.msg is WM_DESTROY)
         {
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged -= OnPropertyChanged;
-            _dialogBoxHandle = 0;
+            _dialogBoxHandle = null;
         }
 
         return null;
