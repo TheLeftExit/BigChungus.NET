@@ -38,8 +38,8 @@ public sealed class DialogProcedure<TViewModel>
     {
         _behaviors = behaviors;
     }
-    public IDlgProc CreateDialogView(TViewModel viewModel)
+    public IDlgProc CreateDlgProc(TViewModel viewModel)
     {
-        return new DialogView<TViewModel>(viewModel, _behaviors);
+        return new DlgProc<TViewModel>(viewModel, _behaviors);
     }
 }

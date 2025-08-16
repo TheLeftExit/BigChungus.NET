@@ -299,4 +299,11 @@ public static partial class Win32
         public POINT ptAction;
         public LPARAM lParam;
     }
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/commctrl/ns-commctrl-pbrange
+    public struct PBRANGE
+    {
+        public int iLow;
+        public int iHigh;
+    }
 }

@@ -3,7 +3,12 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
-public sealed class ListViewVirtualDataBindingState<TViewModel, TRow> : IDisposable
+// Someday I might introduce "real" binding that uses non-virtual mode and supports grouping and checkbox member binding,
+// and then this will become "virtual binding" while the new binding will become "regular binding".
+// Or we could even use LVN_ODCACHEHINT to implement IQueryable support.
+// For now, this is good enough.
+
+public sealed class ListViewDataBindingState<TViewModel, TRow> : IDisposable
     where TViewModel : class
     where TRow : class
 {
@@ -15,7 +20,7 @@ public sealed class ListViewVirtualDataBindingState<TViewModel, TRow> : IDisposa
     // Without this, each `PropertyChanged += OnCollectionChanged` allocates.
     private PropertyChangedEventHandler PropertyChangedHandler => field ??= OnCollectionChanged;
 
-    public ListViewVirtualDataBindingState(IList<TRow> rows, nint controlHandle)
+    public ListViewDataBindingState(IList<TRow> rows, nint controlHandle)
     {
         _rows = rows;
         _trackedRows = new(_rows.Count);
@@ -58,7 +63,7 @@ public sealed class ListViewVirtualDataBindingState<TViewModel, TRow> : IDisposa
     }
 }
 
-public sealed class ListViewVirtualDataBinding<TViewModel, TRow> : DialogBinding<TViewModel, ListViewControl>
+public sealed class ListViewDataBinding<TViewModel, TRow> : DialogBinding<TViewModel, ListViewControl>
     where TViewModel : class
     where TRow : class
 {
@@ -127,7 +132,7 @@ public sealed class ListViewVirtualDataBinding<TViewModel, TRow> : DialogBinding
 
         var item = &((Win32.NMLVDISPINFO*)message.lParam)->item;
         var row = GetProperties(context)
-            .GetProperty<ListViewVirtualDataBindingState<TViewModel, TRow>>(ListPropertyName)!
+            .GetProperty<ListViewDataBindingState<TViewModel, TRow>>(ListPropertyName)!
             .GetRow(item->iItem);
 
         if (StyleHelper.GetFlag(item->mask, LVIF_COLUMNS))
@@ -150,20 +155,20 @@ public sealed class ListViewVirtualDataBinding<TViewModel, TRow> : DialogBinding
             Win32.SendMessage(handle, LVM_SETITEMCOUNT, 0, 0);
             return;
         }
-        var newState = new ListViewVirtualDataBindingState<TViewModel, TRow>(collection, handle);
+        var newState = new ListViewDataBindingState<TViewModel, TRow>(collection, handle);
         GetProperties(context).SetProperty(ListPropertyName, newState);
     }
 
     private void RemoveDataSource(IDialogContext<TViewModel> context)
     {
-        var oldState = GetProperties(context).RemoveProperty<ListViewVirtualDataBindingState<TViewModel, TRow>>(ListPropertyName);
+        var oldState = GetProperties(context).RemoveProperty<ListViewDataBindingState<TViewModel, TRow>>(ListPropertyName);
         oldState?.Dispose();
     }
 }
 
 public static partial class DialogProcedureBuilderExtensions
 {
-    public static void SetListViewVirtualBinding<TViewModel, TRow>(
+    public static void SetListViewBinding<TViewModel, TRow>(
         this IDialogProcedureBuilder<TViewModel> builder,
         DialogItemHandle<ListView> handle,
         Expression<Func<TViewModel, IList<TRow>>> viewModelCollectionPropertySelector,
@@ -180,7 +185,7 @@ public static partial class DialogProcedureBuilderExtensions
 
         if (columns.Length is 0 or > 21) throw new ArgumentException(nameof(columns));
 
-        var behavior = new ListViewVirtualDataBinding<TViewModel, TRow>
+        var behavior = new ListViewDataBinding<TViewModel, TRow>
         {
             ItemId = handle.Id,
             ViewModelGetMethod = viewModelPropertyGetMethod.CreateDelegate<ViewModelGetMethod<TViewModel, IList<TRow>?>>(),

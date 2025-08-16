@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 public sealed class DlgTemplate : BinaryTemplate
 {
-    public uint Style = WS_SYSMENU | WS_MINIMIZEBOX | DS_MODALFRAME | DS_SETFONT | DS_CENTER;
+    public uint Style = WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION | DS_MODALFRAME | DS_SETFONT | DS_CENTER;
     public uint ExStyle = WS_EX_APPWINDOW;
     public List<DlgItemTemplate> Items { get; } = new();
-    public short X = 100;
-    public short Y = 100;
+    public short X = 0;
+    public short Y = 0;
     public short Width = 200;
     public short Height = 200;
     public string? WindowText = "Dialog Box";

@@ -15,6 +15,7 @@
     public ListView()
     {
         Visible = true;
+        TabStop = true;
         StyleHelper.SetFlag(ref style, WS_BORDER, true);
         StyleHelper.SetFlag(ref style, LVS_OWNERDATA, true);
         StyleHelper.SetFlag(ref style, LVS_REPORT, true);

@@ -4,15 +4,16 @@
         where T : IDialogItemProperties, new();
 }
 
-public record struct DialogItemHandle<T>(ushort? Id) where T : IDialogItemProperties;
+public readonly record struct DialogItemHandle<T>(ushort? Id) where T : IDialogItemProperties;
 
-public ref struct RadioGroupScope
+public readonly ref struct RadioGroupScope
 {
     private readonly DialogTemplateBuilder _builder;
     public RadioGroupScope(DialogTemplateBuilder builder)
     {
         _builder = builder;
     }
+    // The `using` pattern sounds nice, until you notice that any dialog items declared inside are inaccessible after the scope ends :(
     public void Dispose()
     {
         _builder.EndRadioGroup();

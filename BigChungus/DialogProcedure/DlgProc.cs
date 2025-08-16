@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -11,31 +12,30 @@ public interface IDialogContext<TViewModel>
     nint DialogBoxHandle { get; }
 }
 
-public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel>
+public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
     where TViewModel : class
 {
     private readonly TViewModel _viewModel;
     private readonly IDialogBehavior<TViewModel>[] _behaviors;
-    private readonly Dictionary<ushort, nint> _controlHandlesById;
 
     private nint? _dialogBoxHandle;
 
-    public DialogView(TViewModel viewModel, IDialogBehavior<TViewModel>[] behaviors)
+    public DlgProc(TViewModel viewModel, IDialogBehavior<TViewModel>[] behaviors)
     {
         _viewModel = viewModel;
         _behaviors = behaviors;
-        _controlHandlesById = new();
     }
 
     TViewModel IDialogContext<TViewModel>.ViewModel => _viewModel;
     nint IDialogContext<TViewModel>.DialogBoxHandle => _dialogBoxHandle ?? throw new InvalidOperationException();
 
-    public nint? DlgProc(Message m)
+    nint? IDlgProc.DlgProc(Message m)
     {
         if (m.msg is WM_INITDIALOG)
         {
             _dialogBoxHandle = m.hWnd;
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged += OnPropertyChanged;
+            DialogTracker.Add(_viewModel, _dialogBoxHandle.Value);
         }
 
         if (_dialogBoxHandle is null)
@@ -62,6 +62,7 @@ public sealed class DialogView<TViewModel> : IDlgProc, IDialogContext<TViewModel
 
         if (m.msg is WM_DESTROY)
         {
+            DialogTracker.Remove(_viewModel);
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged -= OnPropertyChanged;
             _dialogBoxHandle = null;
         }
@@ -96,6 +97,35 @@ public static class PropertyChangedEventArgsExtensions
             }
             e = args;
             return true;
+        }
+    }
+}
+
+public static class DialogTracker
+{
+    private static readonly ConcurrentDictionary<object, nint> _dialogHandlesByViewModel = new();
+
+    public static void Add(object viewModel, nint dialogHandle)
+    {
+        if (!_dialogHandlesByViewModel.TryAdd(viewModel, dialogHandle))
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    public static void Remove(object viewModel)
+    {
+        if (!_dialogHandlesByViewModel.TryRemove(viewModel, out _))
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    public static void Get(object viewModel)
+    {
+        if (!_dialogHandlesByViewModel.TryGetValue(viewModel, out _))
+        {
+            throw new InvalidOperationException();
         }
     }
 }
