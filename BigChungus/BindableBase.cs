@@ -2,10 +2,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-public class ViewModelBase : INotifyPropertyChanged
+public class BindableBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-
     private static readonly ConcurrentDictionary<string, PropertyChangedEventArgs> eventArgsCache = new();
 
     protected void RaisePropertyChanged(string? propertyName = null)
@@ -21,6 +20,14 @@ public class ViewModelBase : INotifyPropertyChanged
     }
 }
 
-public class ViewModelBase<TView, TSelf> : ViewModelBase
-    where TView : IDialogView<TSelf>, new()
-    where TSelf : ViewModelBase<TView, TSelf>;
+public class ViewModelBase<TView, TSelf> : BindableBase, IDialogRunner<TSelf>
+    where TView : IDialogRunner<TSelf>, new()
+    where TSelf : ViewModelBase<TView, TSelf>
+{
+    // For use in setups with `where TViewModel : IDialogRunner<TViewModel>` (to avoid having to specify TView as the generic type)
+    DialogResult IDialogRunner<TSelf>.ShowDialog(TSelf viewModel, nint parentHandle)
+    {
+        var view = new TView();
+        return view.ShowDialog(viewModel, parentHandle);
+    }
+}

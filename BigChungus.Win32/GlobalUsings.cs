@@ -44,9 +44,7 @@ global using unsafe LPCDLGTEMPLATE = void*;
 
 // Callback aliases should use the type aliases above, but C# won't let us cross-reference using statements
 
-/// <summary>
-/// <see href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc"/>
-/// </summary>
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
 global using unsafe WNDPROC = delegate* unmanaged[Stdcall]<nint, uint, nuint, nint, nint>;
 
 // https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633496(v=vs.85)

@@ -1,4 +1,4 @@
-﻿Dialogs.SimpleDialog.Run(new SimpleViewModel());
+﻿Dialogs.SimpleDialog.ShowDialog(new SimpleViewModel());
 
 public class Dialogs
 {
@@ -30,7 +30,7 @@ public class Dialogs
     });
 }
 
-public class SimpleViewModel : ViewModelBase
+public class SimpleViewModel : BindableBase
 {
     public ProgressBarState State { get; set => SetValue(ref field, value); }
     public double Value { get; set => SetValue(ref field, value); } = 0.4;

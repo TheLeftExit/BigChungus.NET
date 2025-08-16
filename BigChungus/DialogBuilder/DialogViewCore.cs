@@ -1,10 +1,10 @@
-﻿public interface IDialogView<TViewModel>
+﻿public interface IDialogRunner<TViewModel>
     where TViewModel : class
 {
-    void Run(TViewModel viewModel);
+    DialogResult ShowDialog(TViewModel viewModel, nint parentHandle = 0);
 }
 
-public class DialogViewCore<TViewModel> : IDialogView<TViewModel>
+public sealed class DialogViewCore<TViewModel> : IDialogRunner<TViewModel>
     where TViewModel : class
 {
     private readonly DialogProcedure<TViewModel> _procedure;
@@ -16,23 +16,23 @@ public class DialogViewCore<TViewModel> : IDialogView<TViewModel>
         _procedure = dlgProc;
     }
 
-    public void Run(TViewModel viewModel)
+    public DialogResult ShowDialog(TViewModel viewModel, nint parentHandle = 0)
     {
-        DialogBoxHelper.DialogBox(_template.Span, _procedure.CreateDlgProc(viewModel));
+        return (DialogResult)DialogBoxHelper.DialogBox(_template.Span, _procedure.CreateDlgProc(viewModel), parentHandle);
     }
 }
 
-public abstract class DialogViewBase<TViewModel> : IDialogView<TViewModel>
+public abstract class DialogViewBase<TViewModel> : IDialogRunner<TViewModel>
     where TViewModel : class
 {
-    private readonly IDialogView<TViewModel> _viewCore;
+    private readonly IDialogRunner<TViewModel> _viewCore;
     public DialogViewBase()
     {
         var builder = new DialogBuilder<TViewModel>();
         Configure(builder);
         _viewCore = builder.Build();
     }
-    public void Run(TViewModel viewModel) => _viewCore.Run(viewModel);
+    public DialogResult ShowDialog(TViewModel viewModel, nint parentHandle = 0) => _viewCore.ShowDialog(viewModel, parentHandle);
     protected abstract void Configure(DialogBuilder<TViewModel> builder);
 }
 

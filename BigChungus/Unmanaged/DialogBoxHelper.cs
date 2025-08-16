@@ -32,7 +32,7 @@ public static class DialogBoxHelper
             hWndParent: parentHandle,
             lpDialogFunc: &DlgProc,
             dwInitParam: (nint)GCHandle.Alloc(handler)
-        );
+        ).ThrowIf(-1).ThrowIf(0);
     }
 
     public unsafe static nint CreateDialog(ReadOnlySpan<byte> template, IDlgProc? handler = null, nint parentHandle = 0)
@@ -45,7 +45,7 @@ public static class DialogBoxHelper
             hWndParent: parentHandle,
             lpDialogFunc: &DlgProc,
             dwInitParam: (nint)GCHandle.Alloc(handler)
-        );
+        ).ThrowIf(0);
     }
 
     // Should address buffer overflows from invalid templates, and make it meaningful to accept a span rather than a ref byte.

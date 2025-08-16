@@ -13,5 +13,9 @@ public static partial class Win32Macros
     // wParam: not used
     // lParam: handle of the control that received WM_KILLFOCUS
     public const UINT WM_KILLFOCUS_REFLECT = WM_APP + 1;
+
+    // WM_INVOKE - sent to marshal code to the UI thread.
+    // wParam: 
+    public const UINT WM_INVOKE = WM_APP + 2;
 }
 

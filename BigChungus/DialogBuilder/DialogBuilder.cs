@@ -4,7 +4,7 @@
     private readonly DialogProcedureBuilder<TViewModel> _dialogProcedureBuilder = new();
     private readonly DialogTemplateBuilder _dialogTemplateBuilder = new();
 
-    public IDialogView<TViewModel> Build()
+    public IDialogRunner<TViewModel> Build()
     {
         var template = _dialogTemplateBuilder.Build();
         var procedure = _dialogProcedureBuilder.Build();

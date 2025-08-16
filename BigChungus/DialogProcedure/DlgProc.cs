@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,6 +11,7 @@ public interface IDialogContext<TViewModel>
 {
     TViewModel ViewModel { get; }
     nint DialogBoxHandle { get; }
+    CancellationToken CancellationToken { get; }
 }
 
 public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
@@ -17,6 +19,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
 {
     private readonly TViewModel _viewModel;
     private readonly IDialogBehavior<TViewModel>[] _behaviors;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private nint? _dialogBoxHandle;
 
@@ -28,6 +31,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
 
     TViewModel IDialogContext<TViewModel>.ViewModel => _viewModel;
     nint IDialogContext<TViewModel>.DialogBoxHandle => _dialogBoxHandle ?? throw new InvalidOperationException();
+    CancellationToken IDialogContext<TViewModel>.CancellationToken => _cancellationTokenSource.Token;
 
     nint? IDlgProc.DlgProc(Message m)
     {
@@ -35,39 +39,57 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
         {
             _dialogBoxHandle = m.hWnd;
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged += OnPropertyChanged;
-            DialogTracker.Add(_viewModel, _dialogBoxHandle.Value);
         }
 
-        if (_dialogBoxHandle is null)
-        {
-            return null;
-        }
+        if(m.msg is WM_DESTROY) _cancellationTokenSource.Cancel(); // WM_CANCEL is unreliable, so we allow WM_DESTROY handlers to clean up during this one message.
 
-        nint? returnValue = null;
-        foreach (var behavior in _behaviors)
-        {
-            var behaviorResult = behavior.OnMessageReceived(m, this);
-            if (behaviorResult is nint behaviorReturnValue)
-            {
-                returnValue = returnValue is null
-                    ? behaviorReturnValue
-                    : throw new InvalidOperationException("Multiple behaviors returned a value for the same message.");
-            }
-        }
+        if (_dialogBoxHandle is null) return null;
 
-        if (m.msg is WM_CLOSE)
+        var returnValue = InvokeBehaviors(m);
+
+        if (m.msg is WM_CLOSE && returnValue is null)
         {
-            Win32.EndDialog(_dialogBoxHandle.Value, 0).ThrowIfFalse();
+            Win32.EndDialog(_dialogBoxHandle.Value, (int)DialogResult.Close).ThrowIfFalse();
         }
 
         if (m.msg is WM_DESTROY)
         {
-            DialogTracker.Remove(_viewModel);
+            _cancellationTokenSource.Dispose();
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged -= OnPropertyChanged;
             _dialogBoxHandle = null;
         }
 
         return null;
+    }
+
+    private nint? InvokeBehaviors(Message message)
+    {
+        nint? returnValue = null;
+        foreach (var behavior in _behaviors)
+        {
+            try
+            {
+                var behaviorResult = behavior.OnMessageReceived(message, this);
+                if (behaviorResult is nint behaviorReturnValue)
+                {
+                    returnValue = returnValue is null
+                        ? behaviorReturnValue
+                        : throw new InvalidOperationException("Multiple behaviors returned a value for the same message.");
+                }
+            }
+            catch (Exception e)
+            {
+                var viewModel = new MessageBoxViewModel()
+                {
+                    Caption = "Unhandled exception",
+                    Text = $"{e.GetType()}: {e.Message}\r\n\r\n{e.StackTrace}",
+                    Icon = MessageBoxIcon.Error
+                };
+                var view = new MessageBoxView();
+                view.ShowDialog(viewModel, _dialogBoxHandle.GetValueOrDefault());
+            }
+        }
+        return returnValue;
     }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -97,35 +119,6 @@ public static class PropertyChangedEventArgsExtensions
             }
             e = args;
             return true;
-        }
-    }
-}
-
-public static class DialogTracker
-{
-    private static readonly ConcurrentDictionary<object, nint> _dialogHandlesByViewModel = new();
-
-    public static void Add(object viewModel, nint dialogHandle)
-    {
-        if (!_dialogHandlesByViewModel.TryAdd(viewModel, dialogHandle))
-        {
-            throw new InvalidOperationException();
-        }
-    }
-
-    public static void Remove(object viewModel)
-    {
-        if (!_dialogHandlesByViewModel.TryRemove(viewModel, out _))
-        {
-            throw new InvalidOperationException();
-        }
-    }
-
-    public static void Get(object viewModel)
-    {
-        if (!_dialogHandlesByViewModel.TryGetValue(viewModel, out _))
-        {
-            throw new InvalidOperationException();
         }
     }
 }
