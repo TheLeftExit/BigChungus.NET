@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 public sealed class RadioGroupBinding<TViewModel, TValue> : IDialogBehavior<TViewModel>
     where TViewModel : class

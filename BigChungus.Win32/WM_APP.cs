@@ -15,7 +15,8 @@ public static partial class Win32Macros
     public const UINT WM_KILLFOCUS_REFLECT = WM_APP + 1;
 
     // WM_INVOKE - sent to marshal code to the UI thread.
-    // wParam: 
+    // wParam: GCHandle to SendOrPostCallback
+    // lParam: GCHandle to state
     public const UINT WM_INVOKE = WM_APP + 2;
 }
 

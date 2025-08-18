@@ -6,7 +6,7 @@
     }
 }
 
-public sealed class MessageBoxViewModel : ViewModelBase<MessageBoxView, MessageBoxViewModel>
+public sealed class MessageBoxViewModel : DialogViewModelBase<MessageBoxView, MessageBoxViewModel>
 {
     public string? Text { get; set; }
     public string Caption { get; set; } = string.Empty;

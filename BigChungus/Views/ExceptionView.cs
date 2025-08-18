@@ -20,7 +20,7 @@
     }
 }
 
-public class ExceptionViewModel : ViewModelBase<ExceptionView, ExceptionViewModel>
+public class ExceptionViewModel : DialogViewModelBase<ExceptionView, ExceptionViewModel>
 {
     private readonly Exception _exception;
     public ExceptionViewModel(Exception exception)

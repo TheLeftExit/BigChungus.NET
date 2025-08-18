@@ -530,4 +530,11 @@ public static unsafe partial class Win32
         HWND hWnd,
         LPCWSTR lpString
     );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadiconw
+    [LibraryImport("user32.dll", EntryPoint = "LoadIconW")]
+    public static partial HICON LoadIcon(
+        HINSTANCE hInstance,
+        LPCWSTR lpIconName
+    );
 }

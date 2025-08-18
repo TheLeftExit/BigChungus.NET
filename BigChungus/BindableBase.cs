@@ -20,9 +20,9 @@ public class BindableBase : INotifyPropertyChanged
     }
 }
 
-public class ViewModelBase<TView, TSelf> : BindableBase, IDialogRunner<TSelf>
+public class DialogViewModelBase<TView, TSelf> : BindableBase, IDialogRunner<TSelf>
     where TView : IDialogRunner<TSelf>, new()
-    where TSelf : ViewModelBase<TView, TSelf>
+    where TSelf : DialogViewModelBase<TView, TSelf>
 {
     // For use in setups with `where TViewModel : IDialogRunner<TViewModel>` (to avoid having to specify TView as the generic type)
     DialogResult IDialogRunner<TSelf>.ShowDialog(TSelf viewModel, nint parentHandle)

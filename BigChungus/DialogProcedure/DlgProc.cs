@@ -19,7 +19,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
 {
     private readonly TViewModel _viewModel;
     private readonly IDialogBehavior<TViewModel>[] _behaviors;
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     private nint? _dialogBoxHandle;
 
@@ -27,6 +27,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
     {
         _viewModel = viewModel;
         _behaviors = behaviors;
+        _cancellationTokenSource = new();
     }
 
     TViewModel IDialogContext<TViewModel>.ViewModel => _viewModel;
@@ -41,7 +42,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged += OnPropertyChanged;
         }
 
-        if(m.msg is WM_DESTROY) _cancellationTokenSource.Cancel(); // WM_CANCEL is unreliable, so we allow WM_DESTROY handlers to clean up during this one message.
+        if(m.msg is WM_DESTROY) _cancellationTokenSource.Cancel(); // WM_CLOSE is unreliable, so we allow WM_DESTROY handlers to clean up during this one message.
 
         if (_dialogBoxHandle is null) return null;
 
@@ -59,7 +60,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
             _dialogBoxHandle = null;
         }
 
-        return null;
+        return returnValue;
     }
 
     private nint? InvokeBehaviors(Message message)

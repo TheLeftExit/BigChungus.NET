@@ -87,6 +87,7 @@ public sealed class ListViewDataBinding<TViewModel, TRow> : DialogBinding<TViewM
 
         if (PropertyChangedEventArgs.Parse(message, out var e))
         {
+            if(e != null && e.PropertyName != ViewModelPropertyName) return;
             RemoveDataSource(context);
             SetDataSource(context);
         }

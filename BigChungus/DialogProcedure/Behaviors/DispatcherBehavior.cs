@@ -1,11 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-public interface IDispatcherBehavior
-{
-    void Post(SendOrPostCallback d, object? state, nint dialogHandle);
-}
-
-public class DispatcherBehavior<TViewModel> : IDialogBehavior<TViewModel>, IDispatcherBehavior
+public class DispatcherBehavior<TViewModel> : IDialogBehavior<TViewModel>
     where TViewModel : class
 {
     nint? IDialogBehavior<TViewModel>.OnMessageReceived(Message message, IDialogContext<TViewModel> context)
@@ -13,13 +8,16 @@ public class DispatcherBehavior<TViewModel> : IDialogBehavior<TViewModel>, IDisp
         if(message.msg is WM_INITDIALOG)
         {
             var dialogHandle = context.DialogBoxHandle;
-            SynchronizationContext.SetSynchronizationContext(new DialogSynchronizationContext(dialogHandle, this));
+            SynchronizationContext.SetSynchronizationContext(new DialogSynchronizationContext(dialogHandle));
             return null;
         }
         if(message.msg is WM_DESTROY)
         {
-            var previousContext = ((DialogSynchronizationContext?)SynchronizationContext.Current)?.PreviousContext;
-            SynchronizationContext.SetSynchronizationContext(previousContext);
+            var currentContext = SynchronizationContext.Current as DialogSynchronizationContext;
+            if(currentContext is not null)
+            {
+                SynchronizationContext.SetSynchronizationContext(currentContext.PreviousContext);
+            }
             return null;
         }
         if(message.msg is WM_INVOKE)
@@ -33,34 +31,44 @@ public class DispatcherBehavior<TViewModel> : IDialogBehavior<TViewModel>, IDisp
 
             callbackHandle.Free();
             stateHandle.Free();
+
+            return 0;
         }
 
         return null;
-    }
-
-    void IDispatcherBehavior.Post(SendOrPostCallback d, object? state, nint dialogHandle)
-    {
-        var callbackHandle = GCHandle.Alloc(d, GCHandleType.Normal);
-        var stateHandle = GCHandle.Alloc(state, GCHandleType.Normal);
-        Win32.PostMessage(dialogHandle, WM_INVOKE, (nuint)GCHandle.ToIntPtr(callbackHandle), GCHandle.ToIntPtr(stateHandle));
     }
 }
 
 public class DialogSynchronizationContext : SynchronizationContext
 {
     private readonly nint _dialogHandle;
-    private readonly IDispatcherBehavior _behavior;
 
     public SynchronizationContext? PreviousContext { get; }
 
-    public DialogSynchronizationContext(nint dialogHandle, IDispatcherBehavior behavior)
+    public DialogSynchronizationContext(nint dialogHandle)
     {
         _dialogHandle = dialogHandle;
-        _behavior = behavior;
         PreviousContext = Current;
     }
 
+    public override void Post(SendOrPostCallback d, object? state)
+    {
+        var callbackHandle = GCHandle.Alloc(d, GCHandleType.Normal);
+        var stateHandle = GCHandle.Alloc(state, GCHandleType.Normal);
+        Win32.PostMessage(_dialogHandle, WM_INVOKE, (nuint)GCHandle.ToIntPtr(callbackHandle), GCHandle.ToIntPtr(stateHandle));
+    }
     public override void Send(SendOrPostCallback d, object? state) => throw new NotImplementedException();
     public override SynchronizationContext CreateCopy() => throw new NotImplementedException();
-    public override void Post(SendOrPostCallback d, object? state) => _behavior.Post(d, state, _dialogHandle);
+}
+
+public static partial class DialogProcedureBuilderExtensions
+{
+    public static void UseDispatcher<TViewModel>(
+        this IDialogProcedureBuilder<TViewModel> builder
+    )
+        where TViewModel : class
+    {
+        var behavior = new DispatcherBehavior<TViewModel>();
+        builder.AddBehavior(behavior);
+    }
 }
