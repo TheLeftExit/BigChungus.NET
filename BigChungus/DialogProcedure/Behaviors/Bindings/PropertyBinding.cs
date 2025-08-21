@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -9,7 +10,7 @@ using System.Runtime.InteropServices;
 public enum ViewModelUpdateMode
 {
     OnPropertyChanged = 0,
-    OnLoseFocus = 1,
+    OnValidation = 1,
     OnDialogClose = 2,
     Never = 3
 }
@@ -34,130 +35,120 @@ public sealed class PropertyBinding<TViewModel, TControl, TCommand, TValue> : Di
     where TCommand : struct, Enum
 {
     public required ViewModelUpdateMode ViewModelUpdateMode { private get; init; }
-    public required ControlGetMethod<TControl, TValue>? ControlGetMethod { private get; init; }
+    public required ControlGetMethod<TControl, TValue> ControlGetMethod { private get; init; }
     public required ControlSetMethod<TControl, TValue>? ControlSetMethod { private get; init; }
     public required TCommand? ControlCommand { private get; init; }
 
     public required ControlUpdateMode ControlUpdateMode { private get; init; }
-    public required ViewModelGetMethod<TViewModel, TValue>? ViewModelGetMethod { private get; init; }
+    public required ViewModelGetMethod<TViewModel, TValue> ViewModelGetMethod { private get; init; }
     public required ViewModelSetMethod<TViewModel, TValue>? ViewModelSetMethod { private get; init; }
     public required string? ViewModelPropertyName { private get; init; }
 
-    private bool isUpdating = false;
-
     protected override void OnMessageReceived(Message message, IDialogContext<TViewModel> context)
     {
-        if (isUpdating) return;
-        using var updateLock = new UpdateLock(ref isUpdating);
-
-        if(ProcessViewModelPropertyChanged(message, context)) return;
-
         if (message.msg is WM_INITDIALOG)
         {
             var control = GetDialogItem(context);
             SubclassHelper.SubclassForLostFocus(control.Handle); // Repeat SetWindowSubclass calls are allowed by comctl32.
-            PushToControl(control, context.ViewModel);
+            Push(PushDirection.ToControl, context);
+            return;
+
+        }
+        if (ControlUpdateMode == ControlUpdateMode.OnPropertyChanged && IsViewModelPropertyChanged(message, context))
+        {
+            Push(PushDirection.ToControl, context);
             return;
         }
 
-        if (!CanPushToViewModel()) return;
+        if(ViewModelUpdateMode <= ViewModelUpdateMode.OnPropertyChanged && IsControlPropertyChangedMessage(message, context))
+        {
+            Push(PushDirection.ToViewModel, context);
+            return;
+        }
 
-        if (ProcessControlPropertyChangedMessage(message, context)) return;
-        if (ProcessLoseFocusMessage(message, context)) return;
-        if (ProcessDialogCloseMessage(message, context)) return;
+        if(ViewModelUpdateMode <= ViewModelUpdateMode.OnValidation && IsLoseFocusMessage(message, context))
+        {
+            Push(PushDirection.ToViewModel, context);
+            return;
+        }
+
+        if(ViewModelUpdateMode <= ViewModelUpdateMode.OnDialogClose && IsDialogCloseMessage(message, context))
+        {
+            Push(PushDirection.ToViewModel, context);
+            return;
+        }
     }
 
-    private bool ProcessViewModelPropertyChanged(Message message, IDialogContext<TViewModel> context)
+    private enum PushDirection { ToControl, ToViewModel }
+
+    private bool ValuesMatch(IDialogContext<TViewModel> context)
+    {
+        var control = GetDialogItem(context);
+        var controlValue = ControlGetMethod(control);
+        var viewModelValue = ViewModelGetMethod(context.ViewModel);
+        return EqualityComparer<TValue>.Default.Equals(viewModelValue, controlValue);
+    }
+
+    private bool _isBouncing = false;
+    private void Push(PushDirection direction, IDialogContext<TViewModel> context)
+    {
+        if (_isBouncing) return;
+        _isBouncing = true;
+        while (!ValuesMatch(context))
+        {
+            var pushed = direction switch
+            {
+                PushDirection.ToControl => TryPushToControl(context),
+                PushDirection.ToViewModel => TryPushToViewModel(context),
+                _ => throw new UnreachableException()
+            };
+            if (!pushed) return;
+            direction = direction == PushDirection.ToControl ? PushDirection.ToViewModel : PushDirection.ToControl;
+        }
+        _isBouncing = false;
+    }
+    [MemberNotNullWhen(true, nameof(ControlSetMethod))]
+    private bool CanPushToControl() => ControlUpdateMode is not ControlUpdateMode.Never && ControlSetMethod is not null;
+    private bool TryPushToControl(IDialogContext<TViewModel> context)
+    {
+        if (!CanPushToControl()) return false;
+        var control = GetDialogItem(context);
+        var value = ViewModelGetMethod(context.ViewModel);
+        ControlSetMethod(control, value);
+        return true;
+    }
+    [MemberNotNullWhen(true, nameof(ViewModelSetMethod))]
+    private bool CanPushToViewModel() => ViewModelUpdateMode is not ViewModelUpdateMode.Never && ViewModelSetMethod is not null;
+    private bool TryPushToViewModel(IDialogContext<TViewModel> context)
+    {
+        if (!CanPushToViewModel()) return false;
+        var control = GetDialogItem(context);
+        var value = ControlGetMethod(control);
+        ViewModelSetMethod(context.ViewModel, value);
+        return true;
+    }
+
+    private bool IsViewModelPropertyChanged(Message message, IDialogContext<TViewModel> context)
     {
         if (!PropertyChangedEventArgs.Parse(message, out var e)) return false;
-
-        if (!CanPushToControl()) return true;
-        
-        var push = e.PropertyName is null || e.PropertyName == ViewModelPropertyName;
-        if (!push) return true;
-
-        var control = GetDialogItem(context);
-        PushToControl(control, context.ViewModel);
-        return true;
+        return e.PropertyName is null || e.PropertyName == ViewModelPropertyName;
     }
-
-    [MemberNotNullWhen(true, nameof(ControlSetMethod), nameof(ViewModelGetMethod))]
-    private bool CanPushToControl() =>
-        ControlUpdateMode is not ControlUpdateMode.Never
-        && ControlSetMethod is not null
-        && ViewModelGetMethod is not null;
-
-    private void PushToControl(TControl control, TViewModel viewModel)
-    {
-        if (!CanPushToControl()) return;
-        var value = ViewModelGetMethod(viewModel);
-        ControlSetMethod(control, value);
-    }
-
-    [MemberNotNullWhen(true, nameof(ControlGetMethod), nameof(ViewModelSetMethod))]
-    private bool CanPushToViewModel() =>
-        ViewModelUpdateMode is not ViewModelUpdateMode.Never
-        && ControlGetMethod is not null
-        && ViewModelSetMethod is not null;
-
-    private void PushToViewModel(TControl control, TViewModel viewModel)
-    {
-        if (!CanPushToViewModel()) return;
-        var value = ControlGetMethod(control);
-        ViewModelSetMethod(viewModel, value);
-    }
-
-    private bool ProcessControlPropertyChangedMessage(Message message, IDialogContext<TViewModel> context)
+    private bool IsControlPropertyChangedMessage(Message message, IDialogContext<TViewModel> context)
     {
         if (!TControl.IsCommandMessage(message, out var command)) return false;
-        if (ViewModelUpdateMode > ViewModelUpdateMode.OnPropertyChanged) return true;
-
-        if (!EqualityComparer<TCommand?>.Default.Equals(command, ControlCommand)) return true;
-
+        if (!EqualityComparer<TCommand?>.Default.Equals(command, ControlCommand)) return false;
         var control = GetDialogItem(context);
-        if (control.IsCommandSender(message, command))
-        {
-            PushToViewModel(control, context.ViewModel);
-        }
-        return true;
+        return control.IsCommandSender(message, command);
     }
-
-    private bool ProcessLoseFocusMessage(Message message, IDialogContext<TViewModel> context)
+    private bool IsLoseFocusMessage(Message message, IDialogContext<TViewModel> context)
     {
         if (message.msg is not WM_KILLFOCUS_REFLECT) return false;
-        if (ViewModelUpdateMode > ViewModelUpdateMode.OnLoseFocus) return true;
-
         var control = GetDialogItem(context);
-        if(message.lParam == control.Handle)
-        {
-            PushToViewModel(control, context.ViewModel);
-        }
-        return true;
+        return message.lParam == control.Handle;
     }
-
-    private bool ProcessDialogCloseMessage(Message message, IDialogContext<TViewModel> context)
+    private bool IsDialogCloseMessage(Message message, IDialogContext<TViewModel> context)
     {
-        if (message.msg is not WM_DESTROY) return false;
-        if (ViewModelUpdateMode > ViewModelUpdateMode.OnDialogClose) return true;
-
-        var control = GetDialogItem(context);
-        PushToViewModel(control, context.ViewModel);
-        return true;
-
-    }
-
-    private readonly ref struct UpdateLock
-    {
-        private readonly ref bool isLocked;
-        public UpdateLock(ref bool isLocked)
-        {
-            this.isLocked = ref isLocked;
-            isLocked = true;
-        }
-        public void Dispose()
-        {
-            isLocked = false;
-        }
+        return message.msg is WM_DESTROY;
     }
 }
 
@@ -175,7 +166,8 @@ file static class SubclassHelper // Separate `file static` because PropertyBindi
                 var parentHandle = Win32.GetParent(hWnd);
                 if (parentHandle != 0)
                 {
-                    Win32.SendMessage(parentHandle, WM_KILLFOCUS_REFLECT, wParam, hWnd);
+                    // Showing dialogs and moving focus inside WM_KILLFOCUS is a big no-no, hence PostMessage.
+                    Win32.PostMessage(parentHandle, WM_KILLFOCUS_REFLECT, wParam, hWnd);
                 }
             }
             return Win32.DefSubclassProc(hWnd, msg, wParam, lParam);
@@ -190,18 +182,18 @@ public static partial class DialogProcedureBuilderExtensions
         ushort? itemId,
         Expression<Func<TControl, TValue>> controlPropertySelector,
         Expression<Func<TViewModel, TValue>> viewModelPropertySelector,
-        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnLoseFocus,
+        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnValidation,
         ControlUpdateMode controlUpdateMode = ControlUpdateMode.OnPropertyChanged
     )
         where TViewModel : class
         where TControl : struct, IControl<TControl, TCommand>
         where TCommand : struct, Enum
     {
-        if (controlPropertySelector is not { Body: MemberExpression { Member: PropertyInfo controlProperty } })
+        if (controlPropertySelector is not { Body: MemberExpression { Member: PropertyInfo controlProperty and { GetMethod: not null } } })
         {
             throw new NotSupportedException();
         }
-        if (viewModelPropertySelector is not { Body: MemberExpression { Member: PropertyInfo viewModelProperty } })
+        if (viewModelPropertySelector is not { Body: MemberExpression { Member: PropertyInfo viewModelProperty and { GetMethod: not null } } })
         {
             throw new NotSupportedException();
         }
@@ -209,10 +201,10 @@ public static partial class DialogProcedureBuilderExtensions
         var behavior = new PropertyBinding<TViewModel, TControl, TCommand, TValue>
         {
             ItemId = itemId,
-            ControlGetMethod = controlProperty.GetMethod?.CreateDelegate<ControlGetMethod<TControl, TValue>>(),
+            ControlGetMethod = controlProperty.GetMethod.CreateDelegate<ControlGetMethod<TControl, TValue>>(),
             ControlSetMethod = controlProperty.SetMethod?.CreateDelegate<ControlSetMethod<TControl, TValue>>(),
             ControlCommand = controlProperty.GetCustomAttribute<PropertyChangedCommandAttribute<TCommand>>()?.Command,
-            ViewModelGetMethod = viewModelProperty.GetMethod?.CreateDelegate<ViewModelGetMethod<TViewModel, TValue>>(),
+            ViewModelGetMethod = viewModelProperty.GetMethod.CreateDelegate<ViewModelGetMethod<TViewModel, TValue>>(),
             ViewModelSetMethod = viewModelProperty.SetMethod?.CreateDelegate<ViewModelSetMethod<TViewModel, TValue>>(),
             ViewModelPropertyName = viewModelProperty.Name,
             ControlUpdateMode = controlUpdateMode,

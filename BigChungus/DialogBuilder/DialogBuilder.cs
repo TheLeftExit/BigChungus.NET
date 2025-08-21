@@ -15,7 +15,7 @@
     public RadioGroupScope BeginRadioGroup() => _dialogTemplateBuilder.BeginRadioGroup();
     public void EndRadioGroup() => _dialogTemplateBuilder.EndRadioGroup();
 
-    void IDialogProcedureBuilder<TViewModel>.AddBehavior(IDialogBehavior<TViewModel> behavior)
+    public void AddBehavior(IDialogBehavior<TViewModel> behavior)
     {
         _dialogProcedureBuilder.AddBehavior(behavior);
     }

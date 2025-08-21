@@ -50,7 +50,7 @@ public static partial class DialogProcedureBuilderExtensions
         this IDialogProcedureBuilder<TViewModel> builder,
         Expression<Func<DialogBox, TValue>> controlPropertySelector,
         Expression<Func<TViewModel, TValue>> viewModelPropertySelector,
-        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnLoseFocus,
+        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnValidation,
         ControlUpdateMode controlUpdateMode = ControlUpdateMode.OnPropertyChanged
     )
         where TViewModel : class

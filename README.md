@@ -1,6 +1,6 @@
 # BigChungus.NET
 
-BigChungus.NET is a work-in-progress minimal UI framework for Windows utilities.
+BigChungus.NET is a minimal UI framework for Windows utilities,
 
 ## Features
 - **NativeAOT-compatible** - the first .NET UI framework that lets you display a dialog box without requiring .NET to be installed, or bundling tens of megabytes of framework bloat with your application.
@@ -16,22 +16,20 @@ Remaining tasks (not limited to):
 
 - [ ] Dialog item & runtime control wrappers
     - [x] `CheckBox`
-    - [ ] `CheckBoxThreeState`
     - [x] `RadioButton` (including grouping & binding)
     - [x] `GroupBox`
     - [x] Dialog box itself
     - [x] `TextBox`
-    - [ ] `Label`
+    - [x] `Label`
     - [ ] `LineHorizontal`/`LineVertical`
-    - [ ] `ProgressBar`
-    - [ ] `TrackBar`
-    - [ ] `ListView` (including list binding)
+    - [x] `ProgressBar`
+    - [x] `ListView` (including list binding)
     - [ ] `TreeView` (including tree binding, somehow)
 - [ ] Services/behaviors
-    - [ ] `Dispatcher`/`SynchronizationContext`
+    - [x] `Dispatcher`/`SynchronizationContext`
     - [ ] Common dialogs (open/save, message box, etc.)
     - [ ] Tooltips
-    - [ ] Validation (if there's a safe and viable solution)
+    - [x] Validation
     - [ ] Images (dialog icon, supported controls)
 - [ ] WYSIWYG dialog editor
 - [ ] IntelliSense docs

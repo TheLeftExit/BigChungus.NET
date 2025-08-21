@@ -72,7 +72,7 @@ public static partial class DialogProcedureBuilderExtensions
         DialogItemHandle<TextBox> handle,
         Expression<Func<TextBoxControl, TValue>> controlPropertySelector,
         Expression<Func<TViewModel, TValue>> viewModelPropertySelector,
-        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnLoseFocus,
+        ViewModelUpdateMode viewModelUpdateMode = ViewModelUpdateMode.OnValidation,
         ControlUpdateMode controlUpdateMode = ControlUpdateMode.OnPropertyChanged
     )
         where TViewModel : class

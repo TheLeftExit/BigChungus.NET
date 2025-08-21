@@ -36,19 +36,36 @@ public class SimpleView : DialogViewBase<SimpleViewModel>
 
         builder.SetCommand(button, x => x.OnClick());
 
-        builder.UseDispatcher();
         builder.UseApplicationIcon();
+        builder.InjectDialogService(x => x.DialogService);
     }
 }
 
 public class SimpleViewModel : DialogViewModelBase<SimpleView, SimpleViewModel>
 {
+    public DialogService DialogService { get; set; }
+
     public ProgressBarState State { get; set => SetValue(ref field, value); }
     public double Value { get; set => SetValue(ref field, value); } = 0.4;
     public string ValueAsText
     {
         get => Value.ToString();
-        set => Value = double.Parse(value);
+        set
+        {
+            if(!double.TryParse(value, out var newValue))
+            {
+                var viewModel = new MessageBoxViewModel
+                {
+                    Caption = "Error",
+                    Text = "What you entered isn't a number.",
+                    Icon = MessageBoxIcon.Warning,
+                    Buttons = MessageBoxButtons.Ok
+                };
+                DialogService.ShowDialog(viewModel);
+                return;
+            }
+            Value = newValue;
+        }
     }
 
     private bool _gettingFreaky;

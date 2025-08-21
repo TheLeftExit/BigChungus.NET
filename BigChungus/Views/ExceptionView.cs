@@ -1,4 +1,4 @@
-﻿public class ExceptionView : DialogViewBase<ExceptionViewModel>
+﻿public sealed class ExceptionView : DialogViewBase<ExceptionViewModel>
 {
     public static ExceptionView Instance { get; } = new();
 
@@ -20,7 +20,7 @@
     }
 }
 
-public class ExceptionViewModel : DialogViewModelBase<ExceptionView, ExceptionViewModel>
+public sealed class ExceptionViewModel : DialogViewModelBase<ExceptionView, ExceptionViewModel>
 {
     private readonly Exception _exception;
     public ExceptionViewModel(Exception exception)

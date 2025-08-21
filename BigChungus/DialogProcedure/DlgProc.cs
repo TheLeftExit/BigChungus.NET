@@ -40,11 +40,12 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
         {
             _dialogBoxHandle = m.hWnd;
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged += OnPropertyChanged;
+            DispatcherHelper.ProcessWmInitDialog(m);
         }
-
-        if(m.msg is WM_DESTROY) _cancellationTokenSource.Cancel(); // WM_CLOSE is unreliable, so we allow WM_DESTROY handlers to clean up during this one message.
-
         if (_dialogBoxHandle is null) return null;
+
+        if (m.msg is WM_DESTROY) _cancellationTokenSource.Cancel(); // WM_CLOSE is unreliable, so we allow WM_DESTROY handlers to clean up during this one message.
+        if (DispatcherHelper.TryProcessWmInvoke(m)) return null;
 
         var returnValue = InvokeBehaviors(m);
 
@@ -55,6 +56,7 @@ public sealed class DlgProc<TViewModel> : IDlgProc, IDialogContext<TViewModel>
 
         if (m.msg is WM_DESTROY)
         {
+            DispatcherHelper.ProcessWmDestroy(m);
             _cancellationTokenSource.Dispose();
             (_viewModel as INotifyPropertyChanged)?.PropertyChanged -= OnPropertyChanged;
             _dialogBoxHandle = null;
