@@ -32,23 +32,25 @@ public readonly struct DialogService
         _handle = handle;
     }
 
+    public bool IsReady => _handle != 0;
+
     private void GuardHandle()
     {
         if (_handle == 0) throw new InvalidOperationException();
     }
 
-    public void ShowDialog<TViewModel>(IDialogRunner<TViewModel> view, TViewModel viewModel)
+    public DialogResult ShowDialog<TViewModel>(IDialogRunner<TViewModel> view, TViewModel viewModel)
         where TViewModel : class
     {
         GuardHandle();
-        view.ShowDialog(viewModel, _handle);
+        return view.ShowDialog(viewModel, _handle);
     }
 
-    public void ShowDialog<TViewModel>(TViewModel viewModel)
+    public DialogResult ShowDialog<TViewModel>(TViewModel viewModel)
         where TViewModel : class, IDialogRunner<TViewModel>
     {
         GuardHandle();
-        viewModel.ShowDialog(viewModel, _handle);
+        return viewModel.ShowDialog(viewModel, _handle);
     }
 
     public void Close(DialogResult result)

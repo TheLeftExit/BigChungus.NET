@@ -537,4 +537,43 @@ public static unsafe partial class Win32
         HINSTANCE hInstance,
         LPCWSTR lpIconName
     );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createpopupmenu
+    [LibraryImport("user32.dll")]
+    public static partial HMENU CreatePopupMenu();
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-appendmenuw
+    [LibraryImport("user32.dll", EntryPoint = "AppendMenuW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL AppendMenu(
+        HMENU hMenu,
+        UINT uFlags,
+        UINT_PTR uIDNewItem,
+        LPCWSTR lpNewItem
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-trackpopupmenuex
+    [LibraryImport("user32.dll")]
+    public static partial int TrackPopupMenuEx(
+        HMENU hMenu,
+        UINT uFlags,
+        int x,
+        int y,
+        HWND hwnd,
+        in TPMPARAMS lptpm
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL GetCursorPos(
+        out POINT lpPoint
+    );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-destroymenu
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL DestroyMenu(
+        HMENU hMenu
+    );
 }

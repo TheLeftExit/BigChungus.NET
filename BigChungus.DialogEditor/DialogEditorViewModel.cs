@@ -1,23 +1,43 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.Drawing;
 
-interface IDialogEditorControl
+public class DialogEditorView : DialogViewBase<DialogEditorViewModel>
 {
-    RectangleDLU Bounds { get; set; }
-    string? Text { get; set; }
-    string WindowClass { get; set; }
-    uint Style { get; set; }
-    uint ExStyle { get; set; }
+    protected override void Configure(DialogBuilder<DialogEditorViewModel> builder)
+    {
+        builder.Properties.Size = new(200, 200);
 
-    // General idea; will probably be changed
-    (string Name, object Value)[] Properties { get; }
-    object GetProperty(string key);
-    void SetProperty(string key, object value);
+        builder.AddBehavior(new ViewModelInitializerBehavior());
+        builder.AddBehavior(new WindowSizeBehavior());
+        builder.AddBehavior(new WindowBackgroundBehavior());
+    }
 }
 
-class DialogEditorViewModel
+public class DialogEditorViewModel : DialogViewModelBase<DialogEditorView, DialogEditorViewModel>
 {
     public SizeDLU Size { get; set; }
-    public ObservableCollection<IDialogEditorControl> Controls { get; } = new();
-}
 
+    // === Internal stuff (will probably be moved to a separate "internal view model") ===
+
+    public SizeDLU MaxDialogSize { get; } = new(2000, 2000);
+    public int[] DLUXPoints { get; set; } = null!;
+    public int[] DLUYPoints { get; set; } = null!;
+
+    public SizeDLU DLUGridSize { get; } = new(4, 4);
+    public int[] DLUXGridPoints => field ??= DLUXPoints.Where((_, index) => index % DLUGridSize.Width == 0).ToArray();
+    public int[] DLUYGridPoints => field ??= DLUYPoints.Where((_, index) => index % DLUGridSize.Height == 0).ToArray();
+    public (nint HBITMAP, nint HDC, Size Size) DLUGridBitmap { get; set; }
+
+    public (int Start, int End) RoundToDLUGrid(int start, int end, VariablePoint variablePoint, DLUDirection direction, out short lengthIndex)
+    {
+        var points = direction == DLUDirection.X ? DLUXGridPoints : DLUYGridPoints;
+        var index = Array.BinarySearch(points, end - start);
+        if (index < 0) index = ~index;
+        lengthIndex = (short)index;
+        return variablePoint switch
+        {
+            VariablePoint.Start => (end - points[index], end),
+            VariablePoint.End => (start, start + points[index]),
+            _ => throw new ArgumentException(nameof(variablePoint))
+        };
+    }
+}

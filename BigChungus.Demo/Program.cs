@@ -1,5 +1,5 @@
-﻿var viewModel = new SimpleViewModel();
-var view = new SimpleView();
+﻿var viewModel = new DialogEditorViewModel();
+var view = new DialogEditorView();
 view.ShowDialog(viewModel);
 
 public class SimpleView : DialogViewBase<SimpleViewModel>
@@ -35,6 +35,8 @@ public class SimpleView : DialogViewBase<SimpleViewModel>
         );
 
         builder.SetCommand(button, x => x.OnClick());
+
+        builder.SetCommand(buttonShowDialog, x => x.ShowMenu());
 
         builder.UseApplicationIcon();
         builder.InjectDialogService(x => x.DialogService);
@@ -90,5 +92,22 @@ public class SimpleViewModel : DialogViewModelBase<SimpleView, SimpleViewModel>
             _gettingFreaky = false;
         }
         
+    }
+
+    public void ShowMenu()
+    {
+        var viewModel = new MenuViewModel()
+        {
+            Items = Enumerable.Range(0, 10).Select(x => $"Item {x}").ToArray()
+        };
+        var view = new MenuView();
+        var result = DialogService.ShowDialog(view, viewModel);
+        
+        var messageViewModel = new MessageBoxViewModel
+        {
+            Caption = result.ToString(),
+            Text = "Selected index: " + viewModel.SelectedIndex,
+        };
+        DialogService.ShowDialog(messageViewModel);
     }
 }
