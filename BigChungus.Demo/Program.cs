@@ -1,4 +1,15 @@
-﻿var viewModel = new DialogEditorViewModel();
+﻿unsafe
+{
+    var initArgs = new Win32.INITCOMMONCONTROLSEX
+    {
+        dwSize = (uint)sizeof(Win32.INITCOMMONCONTROLSEX),
+        dwICC = 0xFF
+    };
+    Win32.InitCommonControlsEx(initArgs);
+}
+
+
+var viewModel = new DialogEditorViewModel();
 var view = new DialogEditorView();
 view.ShowDialog(viewModel);
 
@@ -96,11 +107,11 @@ public class SimpleViewModel : DialogViewModelBase<SimpleView, SimpleViewModel>
 
     public void ShowMenu()
     {
-        var viewModel = new MenuViewModel()
+        var viewModel = new SimpleMenuViewModel()
         {
             Items = Enumerable.Range(0, 10).Select(x => $"Item {x}").ToArray()
         };
-        var view = new MenuView();
+        var view = new SimpleMenuView();
         var result = DialogService.ShowDialog(view, viewModel);
         
         var messageViewModel = new MessageBoxViewModel

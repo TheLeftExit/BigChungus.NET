@@ -576,4 +576,12 @@ public static unsafe partial class Win32
     public static partial BOOL DestroyMenu(
         HMENU hMenu
     );
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-clienttoscreen
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial BOOL ClientToScreen(
+        HWND hWnd,
+        ref POINT lpPoint
+    );
 }

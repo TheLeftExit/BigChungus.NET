@@ -2,15 +2,15 @@
 // - There should be a separate menu item class for each item type (button, sub-menu, separators)
 // - The menu should be displayed by a behavior, where it will be positioned according to WM_CONTEXTMENU parameters.
 // But what we have here should help with Dialog Editor functionalities and other simple scenarios.
+// The "normal" menu will probably have its own builder API and per-item bindings for "enabled", "visible", "checked", etc.
 
 using System.Runtime.CompilerServices;
 
-public sealed class MenuView : IDialogRunner<MenuViewModel>
+public sealed class SimpleMenuView : IDialogRunner<SimpleMenuViewModel>
 {
     private const int StartingItemId = 2000;
 
-    // Explicit implementation, to enforce usage via DialogService where parentHandle won't be 0.
-    DialogResult IDialogRunner<MenuViewModel>.ShowDialog(MenuViewModel viewModel, nint parentHandle)
+    public DialogResult ShowDialog(SimpleMenuViewModel viewModel, nint parentHandle)
     {
         if (parentHandle == 0) throw new ArgumentException("Attempt to show a menu without an owner window.", nameof(parentHandle));
         
@@ -33,7 +33,7 @@ public sealed class MenuView : IDialogRunner<MenuViewModel>
     }
 }
 
-public class MenuViewModel : DialogViewModelBase<MenuView, MenuViewModel>
+public class SimpleMenuViewModel : DialogViewModelBase<SimpleMenuView, SimpleMenuViewModel>
 {
     public string[] Items { get; set; } = Array.Empty<string>();
     public int SelectedIndex { get; set; } = -1;

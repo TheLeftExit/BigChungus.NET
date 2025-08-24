@@ -1,5 +1,4 @@
-﻿using static Win32;
-using BOOL = int;
+﻿using BOOL = int;
 using unsafe LPCWSTR = char*;
 using unsafe LPWSTR = char*;
 

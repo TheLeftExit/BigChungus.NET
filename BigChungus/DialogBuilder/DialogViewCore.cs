@@ -25,14 +25,13 @@ public sealed class DialogViewCore<TViewModel> : IDialogRunner<TViewModel>
 public abstract class DialogViewBase<TViewModel> : IDialogRunner<TViewModel>
     where TViewModel : class
 {
-    private readonly IDialogRunner<TViewModel> _viewCore;
-    public DialogViewBase()
+    public DialogResult ShowDialog(TViewModel viewModel, nint parentHandle = 0)
     {
         var builder = new DialogBuilder<TViewModel>();
         Configure(builder);
-        _viewCore = builder.Build();
+        var viewCore = builder.Build();
+        return viewCore.ShowDialog(viewModel, parentHandle);
     }
-    public DialogResult ShowDialog(TViewModel viewModel, nint parentHandle = 0) => _viewCore.ShowDialog(viewModel, parentHandle);
     protected abstract void Configure(DialogBuilder<TViewModel> builder);
 }
 
