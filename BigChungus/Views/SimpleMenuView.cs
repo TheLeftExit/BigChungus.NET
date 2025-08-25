@@ -35,6 +35,7 @@ public sealed class SimpleMenuView : IDialogRunner<SimpleMenuViewModel>
 
 public class SimpleMenuViewModel : DialogViewModelBase<SimpleMenuView, SimpleMenuViewModel>
 {
+    public SimpleMenuViewModel(params string[] items) => Items = items;
     public string[] Items { get; set; } = Array.Empty<string>();
     public int SelectedIndex { get; set; } = -1;
 }

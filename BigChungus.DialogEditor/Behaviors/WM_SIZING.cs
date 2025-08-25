@@ -22,6 +22,8 @@
         var newHeightDlu = (int)Math.Round(newHeightDluDouble / gridSize.Height) * gridSize.Height;
         var newHeight = dluHelper.DLUToPixelsVert(newHeightDlu);
 
+        context.ViewModel.Size = new SizeDLU((short)newWidthDlu, (short)newHeightDlu);
+
         rect->right = rect->left + newWidth;
         rect->bottom = rect->top + newHeight;
 

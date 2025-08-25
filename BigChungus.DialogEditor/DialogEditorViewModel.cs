@@ -25,5 +25,7 @@ public class DialogEditorViewModel : DialogViewModelBase<DialogEditorView, Dialo
     // === Internal stuff (will probably be moved to a separate "internal view model") ===
 
     public SizeDLU MaxDialogSize { get; } = new(2000, 2000);
+    public Win32.POINT SizingLoopStartingCursorPositionRelativeToControl { get; set; }
+    public SizeDLU SizingLoopStartingSize { get; set; }
     public (nint HBITMAP, nint HDC, Size Size) DLUGridBitmap { get; set; }
 }

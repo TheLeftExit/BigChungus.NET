@@ -39,6 +39,8 @@ public unsafe class WmRButtonUpHandler : IDialogBehavior<DialogEditorViewModel>
             null
         ).ThrowIf(0);
         var font = Win32.SendMessage(context.DialogBoxHandle, WM_GETFONT, 0, 0);
+
+        var properties = new ControlProperties(handle);
         Win32.SendMessage(handle, WM_SETFONT, (nuint)font, 1);
         SubclassHelper.Subclass(handle, context.DialogBoxHandle);
 

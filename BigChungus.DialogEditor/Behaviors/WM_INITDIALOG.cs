@@ -13,6 +13,11 @@ public class WmInitDialogHandler : IDialogBehavior<DialogEditorViewModel>
 
         viewModel.DLUGridBitmap = CreateDLUGridBitmap(context.DialogBoxHandle, viewModel.DLUGridSize);
 
+        var dluHelper = new DLUHelper(context.DialogBoxHandle);
+        Win32.GetClientRect(context.DialogBoxHandle, out var clientRect);
+        var clientRectDLU = dluHelper.PixelsToDLU(clientRect);
+        viewModel.Size = new SizeDLU((short)(clientRectDLU.right - clientRectDLU.left), (short)(clientRectDLU.bottom - clientRectDLU.top));
+
         return null;
     }
     
